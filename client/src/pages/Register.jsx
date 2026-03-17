@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, Gift, Heart, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
@@ -8,8 +9,10 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -24,6 +27,11 @@ const Register = () => {
 
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (!agreed) {
+      setError('You must agree to the Terms of Service to register');
       return;
     }
 
@@ -44,92 +52,188 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              First Name
-            </label>
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Last Name
-            </label>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {loading ? 'Registering...' : 'Register'}
-          </button>
-        </form>
-        <p className="mt-4 text-center text-gray-600">
+    <div className="min-h-screen bg-background" style={{ fontFamily: 'var(--font-sans)' }}>
+      {/* Top Bar */}
+      <header className="flex items-center justify-between px-6 lg:px-12 py-5 border-b border-border">
+        <Link to="/" className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+          NewDua
+        </Link>
+        <p className="text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login
-          </Link>
+          <Link to="/login" className="text-accent font-medium hover:underline">Sign In</Link>
         </p>
-        <p className="mt-2 text-center text-sm text-gray-500">
-          Admin accounts can be created via Postman/API
-        </p>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex items-center justify-center px-4 py-12 lg:py-16">
+        <div className="w-full max-w-[900px] grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden shadow-xl border border-border">
+
+          {/* Left - Image Panel */}
+          <div className="relative hidden md:flex flex-col justify-end p-8 min-h-[650px]">
+            <img
+              src="https://images.unsplash.com/photo-1490312278390-ab64016e0aa9?w=800&h=900&fit=crop"
+              alt="Pottery"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/30 to-transparent" />
+            <div className="relative z-10 text-center">
+              <h2 className="text-3xl font-light text-background mb-3" style={{ fontFamily: 'var(--font-serif)' }}>
+                Join Our <span className="italic text-accent">Community</span>
+              </h2>
+              <p className="text-background/70 text-sm leading-relaxed max-w-xs mx-auto mb-8">
+                Create an account to enjoy exclusive access to handcrafted pottery pieces and special offers.
+              </p>
+              <div className="flex justify-center gap-6">
+                <div className="w-10 h-10 rounded-full bg-background/20 flex items-center justify-center">
+                  <ShoppingBag size={18} className="text-background/80" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-background/20 flex items-center justify-center">
+                  <Gift size={18} className="text-background/80" />
+                </div>
+                <div className="w-10 h-10 rounded-full bg-background/20 flex items-center justify-center">
+                  <Heart size={18} className="text-background/80" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right - Form Panel */}
+          <div className="bg-card p-8 lg:p-10 flex flex-col justify-center">
+            <div className="text-center mb-6">
+              <h1 className="text-3xl font-semibold mb-2" style={{ fontFamily: 'var(--font-serif)' }}>Create Your Account</h1>
+              <p className="text-muted-foreground text-sm">Start your journey with handcrafted pottery</p>
+            </div>
+
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">First Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Last Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Email Address *</label>
+                <div className="relative">
+                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="john@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Password *</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Confirm Password *</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  />
+                </div>
+              </div>
+
+              <label className="flex items-start gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="w-4 h-4 rounded border-border accent-accent mt-0.5"
+                />
+                <span>
+                  I agree to the{' '}
+                  <Link to="#" className="text-accent hover:underline">Terms of Service</Link>
+                  {' '}and{' '}
+                  <Link to="#" className="text-accent hover:underline">Privacy Policy</Link>
+                </span>
+              </label>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {loading ? 'Registering...' : 'Create Account'}
+              </button>
+            </form>
+
+            {/* Divider */}
+            {/* <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground">or continue with</span>
+              <div className="flex-1 h-px bg-border" />
+            </div> */}
+
+            {/* Social */}
+            {/* <div className="grid grid-cols-2 gap-3">
+              <button className="flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
+                <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Google
+              </button>
+              <button className="flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
+                <svg className="w-4 h-4" fill="#1877F2" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook
+              </button>
+            </div> */}
+
+            <p className="mt-4 text-center text-xs text-gray-500">
+              Admin accounts can be created via Postman/API
+            </p>
+
+            <p className="text-center text-sm text-muted-foreground mt-5">
+              Already have an account?{' '}
+              <Link to="/login" className="text-accent font-medium hover:underline">Sign In</Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

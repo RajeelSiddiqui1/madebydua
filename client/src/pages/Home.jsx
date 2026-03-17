@@ -1,22 +1,64 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronRight, Truck, Shield, RotateCcw, Heart } from 'lucide-react';
 import { productAPI, categoryAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { wishlistAPI } from '../services/api';
+
+/* ── Static Fallback Data ─────────────────────────────────────────── */
+
+const staticCategories = [
+  { name: 'Clearance Sale', image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop' },
+  { name: 'Candles', image: 'https://images.unsplash.com/photo-1602607912066-85af05755121?w=400&h=400&fit=crop' },
+  { name: 'Gifting', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35a6?w=400&h=400&fit=crop' },
+  { name: 'Decoration Sets', image: 'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=400&h=400&fit=crop' },
+];
+
+const staticFeaturedProducts = [
+  { name: 'Classic Cotton T-Shirt', price: 29.99, oldPrice: 39.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop', isNew: true },
+  { name: 'Leather Wallet', price: 49.99, oldPrice: 59.99, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop', isNew: true },
+  { name: 'Minimalist Watch', price: 89.99, oldPrice: 119.99, image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=400&fit=crop', isNew: true },
+  { name: 'Denim Jacket', price: 79.99, oldPrice: 99.99, image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop', isNew: true },
+  { name: 'Canvas Backpack', price: 59.99, oldPrice: 75.99, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop', isNew: false },
+  { name: 'Sunglasses', price: 34.99, oldPrice: 44.99, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop', isNew: false },
+  { name: 'Ceramic Vase', price: 44.99, oldPrice: 54.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop', isNew: false },
+  { name: 'Wireless Earbuds', price: 129.99, oldPrice: 159.99, image: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop', isNew: false },
+];
+
+const staticNewArrivals = [
+  { name: 'Wireless Earbuds', price: 129.99, image: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop' },
+  { name: 'Ceramic Vase', price: 44.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop' },
+  { name: 'Sunglasses', price: 34.99, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop' },
+  { name: 'Canvas Backpack', price: 59.99, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop' },
+  { name: 'Denim Jacket', price: 79.99, image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop' },
+  { name: 'Minimalist Watch', price: 89.99, image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=400&fit=crop' },
+  { name: 'Leather Wallet', price: 49.99, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop' },
+  { name: 'Classic Cotton T-Shirt', price: 29.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop' },
+];
+
+/* ── Component ────────────────────────────────────── */
 
 const Home = () => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, categoriesRes] = await Promise.all([
+        const [productsRes, featuredRes, categoriesRes] = await Promise.all([
           productAPI.getAll(),
+          productAPI.getFeatured(),
           categoryAPI.getAll(),
         ]);
         setProducts(productsRes.data?.filter(p => p.active !== false) || []);
+        setFeaturedProducts(featuredRes.data?.filter(p => p.active !== false) || []);
         setCategories(categoriesRes.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -27,153 +69,189 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 8);
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await wishlistAPI.getAll();
+          setWishlistCount(response.data?.length || 0);
+        } catch (error) {
+          console.error('Error fetching wishlist count:', error);
+        }
+      }
+    };
+    fetchWishlistCount();
+  }, [isAuthenticated]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
+  const getImageUrl = (item) => {
+    if (item.image && item.image.startsWith('http')) {
+      return item.image;
+    }
+    return item.image ? `http://localhost:5007/uploads/product/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+  };
+
+  const getCategoryImage = (item) => {
+    if (item.image && item.image.startsWith('http')) return item.image;
+    if (item.image) return `http://localhost:5007/uploads/category/${item.image}`;
+    return staticCategories[Math.floor(Math.random() * staticCategories.length)].image;
+  };
+
+  const displayCategories = categories.length > 0 ? categories.map(c => ({
+    ...c,
+    image: getCategoryImage(c)
+  })) : staticCategories;
+
+  const apiFeatured = featuredProducts.slice(0, 8);
+  const displayFeatured = apiFeatured.length > 0 ? apiFeatured.map(p => ({
+    ...p,
+    image: getImageUrl(p)
+  })) : staticFeaturedProducts;
+
+  const apiNewArrivals = [...products].reverse().slice(0, 8);
+  const displayNewArrivals = apiNewArrivals.length > 0 ? apiNewArrivals.map(p => ({
+    ...p,
+    image: getImageUrl(p)
+  })) : staticNewArrivals;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Navigation */}
-      <nav className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <Link to="/" className="text-2xl font-bold text-white">
-              MakeIt
+    <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
+
+      <Header 
+        wishlistCount={wishlistCount}
+        navLinks={[
+          { name: 'Home', path: '/' },
+          { name: 'Shop', path: '/shop' },
+          { name: 'Collections', path: '/shop' },
+          { name: 'About', path: '/about' }
+        ]}
+        showAuthButtons={true}
+        showSearch={true}
+      />
+
+      {/* ── Hero ── */}
+      <section className="relative h-[70vh] min-h-[400px] overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1920&h=1080&fit=crop"
+          alt="Beautiful Handcrafted Pottery"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 to-transparent" />
+        <div className="relative z-10 h-full flex flex-col justify-center px-8 sm:px-16 lg:px-24 max-w-3xl">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-[1.1] text-background mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+            Beautiful <span className="text-accent italic">Handcrafted</span> Pottery
+          </h1>
+          <p className="text-background/80 text-lg mb-8 max-w-md">
+            Discover our unique collection of handcrafted ceramics. Each piece is made with care.
+          </p>
+          <div>
+            <Link
+              to="/page/user"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-accent text-accent-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              Explore Collection
+              <ChevronRight size={16} />
             </Link>
-            <div className="flex items-center gap-6">
-              <Link to="/page/user" className="text-gray-300 hover:text-white transition-colors">
-                Shop
-              </Link>
-              {isAuthenticated ? (
-                <Link to="/page/user" className="text-gray-300 hover:text-white transition-colors">
-                  My Account
-                </Link>
-              ) : (
-                <Link to="/login" className="text-gray-300 hover:text-white transition-colors">
-                  Login
-                </Link>
-              )}
-            </div>
           </div>
         </div>
-      </nav>
+      </section>
 
-      {/* Hero Banner */}
-      <div className="relative bg-gradient-to-r from-pink-600 to-purple-700 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            TRENDING FASHION
-          </h1>
-          <p className="text-xl mb-8 text-pink-100">
-            Discover the latest styles and express your unique personality
-          </p>
-          <Link
-            to="/page/user"
-            className="inline-block bg-white text-pink-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Shop Now
-          </Link>
-        </div>
-      </div>
-
-      {/* Categories */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-2xl font-bold mb-6">Shop by Category</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {categories.map((category) => (
-            <Link
-              key={category._id}
-              to={`/page/user?category=${category._id}`}
-              className="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition-colors border border-gray-700"
-            >
-              <h3 className="text-lg font-semibold">{category.name}</h3>
-              {category.description && (
-                <p className="text-sm text-gray-400 mt-2">{category.description}</p>
-              )}
+      {/* ── Shop by Category ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-center mb-10" style={{ fontFamily: 'var(--font-serif)' }}>
+          Shop by Category
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {displayCategories.map((cat, idx) => (
+             <Link key={cat._id || idx} to={`/page/user?category=${cat._id || cat.name}`} className="group relative rounded-xl overflow-hidden aspect-square">
+              <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-foreground/30 group-hover:bg-foreground/40 transition-colors" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-background text-sm sm:text-base font-semibold tracking-wide">{cat.name}</span>
+              </div>
             </Link>
           ))}
-          {categories.length === 0 && (
-            <p className="text-gray-400 col-span-4 text-center">
-              No categories available
-            </p>
-          )}
         </div>
-      </div>
+      </section>
 
-      {/* Featured Products */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-2xl font-bold mb-6">Featured Products</h2>
-        {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <Link
-                key={product._id}
-                to={`/product/${product._id}`}
-                className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors border border-gray-700 group"
-              >
-                <div className="h-64 bg-gray-700 relative">
-                  {product.image ? (
-                    <img
-                      src={`http://localhost:5007/uploads/product/${product.image}`}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No Image
-                    </div>
+      {/* ── Featured Pieces ── */}
+      <section className="bg-card py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-accent text-sm font-medium uppercase tracking-widest mb-1">Featured</p>
+            <h2 className="text-2xl sm:text-3xl font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Featured Pieces</h2>
+            <p className="text-muted-foreground mt-2">Handpicked for you</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            {displayFeatured.map((product, idx) => (
+              <Link key={product._id || idx} to={`/product/${product._id || product.name}`} className="group block">
+                <div className="relative rounded-xl overflow-hidden aspect-[4/3] sm:aspect-square bg-muted mb-3">
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {product.isNew && (
+                    <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded">
+                      NEW
+                    </span>
                   )}
-                  <button className="absolute bottom-3 right-3 bg-pink-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+                  <button className="absolute top-3 right-3 p-1.5 rounded-full bg-background/80 hover:bg-background text-foreground transition-colors opacity-0 group-hover:opacity-100" onClick={(e) => { e.preventDefault(); }}>
+                    <Heart size={14} />
                   </button>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-white truncate">{product.name}</h3>
-                  <p className="text-sm text-gray-400">{product.category?.name || 'Uncategorized'}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-lg font-bold text-pink-500">
-                      ${product.price}
-                    </span>
-                  </div>
+                <h3 className="text-sm font-medium truncate">{product.name}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-sm font-semibold">${product.price}</span>
+                  {product.oldPrice && (
+                    <span className="text-xs text-muted-foreground line-through">${product.oldPrice}</span>
+                  )}
                 </div>
               </Link>
             ))}
           </div>
-        ) : (
-          <p className="text-gray-400 text-center">No featured products available</p>
-        )}
-      </div>
-
-      {/* All Products CTA */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-gray-800 rounded-lg p-8 text-center border border-gray-700">
-          <h2 className="text-3xl font-bold mb-4">Browse All Products</h2>
-          <p className="text-gray-400 mb-6">
-            Explore our complete collection of products
-          </p>
-          <Link
-            to="/page/user"
-            className="bg-pink-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-pink-700 transition-colors inline-block"
-          >
-            View All Products
-          </Link>
         </div>
-      </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
-          <p>&copy; 2024 MakeIt. All rights reserved.</p>
+      {/* ── New Arrivals ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-10">
+          <p className="text-accent text-sm font-medium uppercase tracking-widest mb-1">New Arrivals</p>
+          <h2 className="text-2xl sm:text-3xl font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Latest Creations</h2>
         </div>
-      </footer>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+          {displayNewArrivals.map((product, idx) => (
+            <Link key={product._id || idx} to={`/product/${product._id || product.name}`} className="group block">
+              <div className="relative rounded-xl overflow-hidden aspect-[4/3] sm:aspect-square bg-muted mb-3">
+                <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <button className="absolute top-3 right-3 p-1.5 rounded-full bg-background/80 hover:bg-background text-foreground transition-colors opacity-0 group-hover:opacity-100" onClick={(e) => { e.preventDefault(); }}>
+                  <Heart size={14} />
+                </button>
+              </div>
+              <h3 className="text-sm font-medium truncate">{product.name}</h3>
+              <span className="text-sm font-semibold mt-1 block">${product.price}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Trust Badges ── */}
+      <section className="border-t border-border bg-card py-12">
+        <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <Truck size={28} className="text-accent" />
+            <h4 className="font-semibold text-sm">Free Shipping</h4>
+            <p className="text-xs text-muted-foreground">On orders over $50</p>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Shield size={28} className="text-accent" />
+            <h4 className="font-semibold text-sm">Secure Payment</h4>
+            <p className="text-xs text-muted-foreground">100% secure checkout</p>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <RotateCcw size={28} className="text-accent" />
+            <h4 className="font-semibold text-sm">Easy Returns</h4>
+            <p className="text-xs text-muted-foreground">30-day return policy</p>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 };

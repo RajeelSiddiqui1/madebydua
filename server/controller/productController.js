@@ -2,6 +2,27 @@ import Product from "../models/productModel.js";
 import fs from "fs";
 import path from "path";
 
+// 📥 Get Single Product by ID (with ratings and wishlist)
+export const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate("category", "name slug")
+      .populate({
+        path: "ratings",
+        populate: { path: "user", select: "firstName lastName" },
+      })
+      .populate("wishList", "firstName lastName");
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // ➕ Create Product with image
 export const createProduct = async (req, res) => {
   try {
@@ -19,26 +40,31 @@ export const createProduct = async (req, res) => {
 };
 
 // ✏️ Update Product (override image if new)
+// ✏️ Update Product with optional image override
 export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    // remove old image if new uploaded
-    if (req.file && product.image) {
-      const oldImagePath = path.join(
-        process.cwd(),
-        "uploads/product",
-        product.image
-      );
-      if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
-
+    // Override image if new uploaded
+    if (req.file) {
+      if (product.image) {
+        const oldImagePath = path.join(process.cwd(), "uploads/product", product.image);
+        if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
+      }
       product.image = req.file.filename;
     }
 
-    // update other fields
-    Object.assign(product, req.body);
+    // Update other fields manually to avoid overwriting image
+    const { name, shortDesc, longDesc, price, comparePrice, category, isFeatured, active } = req.body;
+    if (name) product.name = name;
+    if (shortDesc) product.shortDesc = shortDesc;
+    if (longDesc) product.longDesc = longDesc;
+    if (price) product.price = price;
+    if (comparePrice) product.comparePrice = comparePrice;
+    if (category) product.category = category;
+    if (isFeatured !== undefined) product.isFeatured = isFeatured;
+    if (active !== undefined) product.active = active;
 
     await product.save();
     res.json(product);

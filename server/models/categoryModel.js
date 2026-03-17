@@ -22,6 +22,10 @@ const categorySchema = new Schema(
       type: Boolean,
       default: true,
     },
+    image: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

@@ -7,6 +7,10 @@ import authRoute from "./routes/authRoutes.js"
 import categoryRoute from "./routes/categoryRoutes.js"
 import productRoute from "./routes/productRoutes.js"
 import couponRoute from "./routes/couponRoutes.js"
+import ratingRoute from "./routes/ratingRoutes.js"
+import wishListRoute from "./routes/wishListRoutes.js"
+import cartRoute from "./routes/cartRoutes.js"
+import orderRoute from "./routes/orderRoutes.js"
 import dbConnect from "./lib/db.js"
 
 dotenv.config()
@@ -34,6 +38,10 @@ app.use("/api/auth", authRoute)
 app.use("/api/category", categoryRoute)
 app.use("/api/product", productRoute)
 app.use("/api/coupon", couponRoute)
+app.use("/api/rating", ratingRoute)
+app.use("/api/wishlist", wishListRoute)
+app.use("/api/cart", cartRoute)
+app.use("/api/order", orderRoute)
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)

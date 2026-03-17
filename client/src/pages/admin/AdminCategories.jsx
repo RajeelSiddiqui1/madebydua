@@ -10,7 +10,8 @@ const AdminCategories = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', slug: '' });
+  const [imageFile, setImageFile] = useState(null);
 
   const fetchCategories = async () => {
     try {
@@ -34,14 +35,22 @@ const AdminCategories = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('slug', formData.slug);
+      if (imageFile) {
+        submitData.append('image', imageFile);
+      }
+
       if (editingCategory) {
-        await categoryAPI.update(editingCategory._id, formData);
+        await categoryAPI.update(editingCategory._id, submitData);
       } else {
-        await categoryAPI.create(formData);
+        await categoryAPI.create(submitData);
       }
       setShowModal(false);
       setEditingCategory(null);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', slug: '' });
+      setImageFile(null);
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
@@ -50,7 +59,8 @@ const AdminCategories = () => {
 
   const handleEdit = (category) => {
     setEditingCategory(category);
-    setFormData({ name: category.name, description: category.description || '' });
+    setFormData({ name: category.name, slug: category.slug || '' });
+    setImageFile(null);
     setShowModal(true);
   };
 
@@ -76,7 +86,8 @@ const AdminCategories = () => {
 
   const openModal = () => {
     setEditingCategory(null);
-    setFormData({ name: '', description: '' });
+    setFormData({ name: '', slug: '' });
+    setImageFile(null);
     setShowModal(true);
   };
 
@@ -107,10 +118,13 @@ const AdminCategories = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Image
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Description
+                slug
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Products
@@ -123,8 +137,21 @@ const AdminCategories = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {categories.map((category) => (
               <tr key={category._id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {category.image ? (
+                    <img 
+                      src={`http://localhost:5007/uploads/category/${category.image}`} 
+                      alt={category.name} 
+                      className="w-12 h-12 rounded object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                      No img
+                    </div>
+                  )}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap font-medium">{category.name}</td>
-                <td className="px-6 py-4">{category.description || '-'}</td>
+                <td className="px-6 py-4">{category.slug || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
                     {getProductCount(category._id)} Products
@@ -181,13 +208,33 @@ const AdminCategories = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Description
+                  slug
                 </label>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows="3"
+                />
+              </div>
+              <div className="mb-6">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Category Image
+                </label>
+                {editingCategory?.image && !imageFile && (
+                  <div className="mb-2">
+                    <img 
+                      src={`http://localhost:5007/uploads/category/${editingCategory.image}`} 
+                      alt={editingCategory.name} 
+                      className="h-20 w-20 object-cover rounded" 
+                    />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files[0])}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="flex justify-end gap-2">
@@ -218,7 +265,7 @@ const AdminCategories = () => {
               {selectedCategory.name}
             </h2>
             <p className="text-gray-600 mb-4">
-              {selectedCategory.description || 'No description'}
+              {selectedCategory.slug || 'No slug'}
             </p>
             <p className="text-sm text-gray-500 mb-4">
               Total Products: {categoryProducts.length}
@@ -243,7 +290,7 @@ const AdminCategories = () => {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold">{product.name}</h3>
-                      <p className="text-sm text-gray-500">{product.shortDesc || 'No description'}</p>
+                      <p className="text-sm text-gray-500">{product.shortDesc || 'No slug'}</p>
                       <p className="text-blue-600 font-bold mt-1">${product.price}</p>
                       <span className={`text-xs ${product.active ? 'text-green-600' : 'text-red-600'}`}>
                         {product.active ? 'Active' : 'Inactive'}

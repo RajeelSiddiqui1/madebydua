@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Pages
 import Home from './pages/Home';
+import About from './pages/About';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProductDetail from './pages/ProductDetail';
@@ -15,8 +16,12 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminCoupons from './pages/admin/AdminCoupons';
 
 // User Pages
-import UserLayout from './pages/user/UserLayout';
+import Shop from './pages/Shop';
 import UserDashboard from './pages/user/UserDashboard';
+import Wishlist from './pages/user/Wishlist';
+import Cart from './pages/user/Cart';
+import Checkout from './pages/user/Checkout';
+import Profile from './pages/user/Profile';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -62,6 +67,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/product/:id" element={<ProductDetail />} />
@@ -83,14 +89,18 @@ function App() {
 
           {/* User Routes */}
           <Route
-            path="/page/user"
+            path="/shop"
             element={
               <UserRoute>
-                <UserLayout />
+                <Shop />
               </UserRoute>
             }
           >
             <Route index element={<UserDashboard />} />
+            <Route path="wishlist" element={<Wishlist />} />
+            <Route path="cart" element={<Cart />} />
+            <Route path="checkout" element={<Checkout />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
 
           {/* Catch all - redirect to home */}

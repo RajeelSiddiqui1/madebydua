@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { productAPI, categoryAPI } from '../../services/api';
+import { Link, useSearchParams } from 'react-router-dom';
+import { productAPI, categoryAPI, wishlistAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { Heart, ChevronDown, SlidersHorizontal, SearchX, User } from 'lucide-react';
 
 const UserDashboard = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
+  const [wishlist, setWishlist] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category') || '';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
   const fetchProducts = async () => {
     try {
@@ -30,16 +36,39 @@ const UserDashboard = () => {
     }
   };
 
+  const fetchWishlist = async () => {
+    try {
+      const response = await wishlistAPI.getAll();
+      setWishlist(response.data || []);
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    if (isAuthenticated) {
+      fetchWishlist();
+    }
   }, []);
+
+  // Sync category via URL when selected category changes
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategory(categoryId);
+    if (categoryId) {
+      setSearchParams({ category: categoryId });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   const filteredProducts = selectedCategory
     ? products.filter(
         (product) =>
           product.category?._id === selectedCategory ||
-          product.category === selectedCategory
+          product.category === selectedCategory ||
+          product.category?.name === selectedCategory
       )
     : products;
 
@@ -47,124 +76,213 @@ const UserDashboard = () => {
     (product) => product.active !== false
   );
 
+  const isInWishlist = (productId) => {
+    return wishlist.some((item) => item._id === productId);
+  };
+
+  const handleWishlistToggle = async (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) return;
+    
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist(productId)) {
+        await wishlistAPI.remove(productId);
+        setWishlist(wishlist.filter((item) => item._id !== productId));
+      } else {
+        await wishlistAPI.add(productId);
+        await fetchWishlist();
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  const getImageUrl = (item) => {
+    if (item.image && item.image.startsWith('http')) return item.image;
+    return item.image ? `http://localhost:5007/uploads/product/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-muted-foreground font-medium" style={{ fontFamily: 'var(--font-serif)' }}>Loading pieces...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Page Header */}
-      <div className="bg-gradient-to-r from-pink-600 to-purple-700 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-center">Our Products</h1>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button
-            onClick={() => setSelectedCategory('')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedCategory === ''
-                ? 'bg-pink-600 text-white'
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-            }`}
-          >
-            All
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category._id}
-              onClick={() => setSelectedCategory(category._id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category._id
-                  ? 'bg-pink-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-              }`}
+    <div className="bg-background">
+      {/* Shop Header */}
+      <section className="bg-secondary/50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="flex justify-end mb-4">
+            <Link 
+              to="/shop/profile" 
+              className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
             >
-              {category.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Products Grid */}
-        {activeProducts.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            No products found
+              <User size={16} />
+              My Profile
+            </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {activeProducts.map((product) => (
-              <div
-                key={product._id}
-                className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors border border-gray-700 group"
-              >
-                <Link to={`/product/${product._id}`}>
-                  <div className="h-64 bg-gray-700 relative">
-                    {product.image ? (
-                      <img
-                        src={`http://localhost:5007/uploads/product/${product.image}`}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        No Image
+          <h1 className="text-4xl lg:text-5xl font-light mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+            Shop Our <span className="italic text-accent">Collection</span>
+          </h1>
+          <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed">
+            Discover the perfect handcrafted addition for your home.
+            Each piece is unique and carefully designed with love.
+          </p>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 flex flex-col lg:flex-row gap-10">
+        
+        {/* Sidebar Filters */}
+        <aside className="w-full lg:w-64 shrink-0">
+          <div className="sticky top-24">
+            <div className="flex items-center gap-2 font-semibold mb-6 pb-4 border-b border-border">
+              <SlidersHorizontal size={20} />
+              <span className="text-lg" style={{ fontFamily: 'var(--font-serif)' }}>Filters</span>
+            </div>
+
+            <div className="mb-8">
+              <h3 className="font-medium text-sm uppercase tracking-wider mb-4 flex items-center justify-between cursor-pointer">
+                Categories
+                <ChevronDown size={16} />
+              </h3>
+              <ul className="space-y-3">
+                <li>
+                  <button
+                    onClick={() => handleCategorySelect('')}
+                    className={`text-sm flex items-center gap-3 transition-colors w-full text-left ${
+                      selectedCategory === '' ? 'text-accent font-semibold' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      selectedCategory === '' ? 'border-accent' : 'border-muted-foreground/30'
+                    }`}>
+                      {selectedCategory === '' && <div className="w-2 h-2 rounded-full bg-accent" />}
+                    </div>
+                    All Products
+                  </button>
+                </li>
+                {categories.map((category) => (
+                  <li key={category._id}>
+                    <button
+                      onClick={() => handleCategorySelect(category._id)}
+                      className={`text-sm flex items-center gap-3 transition-colors w-full text-left ${
+                        selectedCategory === category._id || selectedCategory === category.name ? 'text-accent font-semibold' : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        selectedCategory === category._id || selectedCategory === category.name ? 'border-accent' : 'border-muted-foreground/30'
+                      }`}>
+                        {(selectedCategory === category._id || selectedCategory === category.name) && <div className="w-2 h-2 rounded-full bg-accent" />}
                       </div>
-                    )}
-                    {product.isFeatured && (
-                      <span className="absolute top-2 left-2 bg-yellow-500 text-xs font-bold px-2 py-1 rounded">
-                        Featured
-                      </span>
-                    )}
-                    <button className="absolute bottom-3 right-3 bg-pink-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
+                      {category.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </aside>
+
+        {/* Product Grid */}
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
+            <p className="text-sm text-muted-foreground font-medium">
+              Showing <span className="text-foreground">{activeProducts.length}</span> results
+            </p>
+            <div className="flex gap-2">
+               <select className="bg-transparent border border-border text-sm py-1.5 px-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent">
+                 <option>Sort by: Featured</option>
+                 <option>Price: Low to High</option>
+                 <option>Price: High to Low</option>
+                 <option>Newest Arrivals</option>
+               </select>
+            </div>
+          </div>
+
+          {activeProducts.length === 0 ? (
+            <div className="text-center py-24 bg-card rounded-2xl border border-border flex flex-col items-center">
+              <SearchX size={48} className="text-muted-foreground/30 mb-4" />
+              <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-serif)' }}>No products found</h3>
+              <p className="text-muted-foreground max-w-sm">We couldn't find anything matching your selected category. Please try changing your filters.</p>
+              <button 
+                onClick={() => handleCategorySelect('')}
+                className="mt-6 px-6 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-6">
+              {activeProducts.map((product) => (
+                <Link
+                  key={product._id}
+                  to={`/product/${product._id}`}
+                  className="group block"
+                >
+                  <div className="relative rounded-xl overflow-hidden aspect-[4/5] bg-muted mb-4 border border-border/50">
+                    <img
+                      src={getImageUrl(product)}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                    
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                       {product.isFeatured && (
+                         <span className="bg-accent text-accent-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm">
+                           Featured
+                         </span>
+                       )}
+                       {product.comparePrice && product.comparePrice > product.price && (
+                         <span className="bg-destructive text-destructive-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm">
+                           Sale
+                         </span>
+                       )}
+                    </div>
+                    
+                    <button 
+                      className={`absolute top-3 right-3 p-2 rounded-full bg-background/90 hover:bg-background transition-all opacity-100 shadow-sm ${isInWishlist(product._id) ? 'text-red-500' : 'text-foreground hover:text-accent'}`}
+                      onClick={(e) => handleWishlistToggle(e, product._id)}
+                      disabled={wishlistLoading}
+                      title={isInWishlist(product._id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      <Heart size={16} className={isInWishlist(product._id) ? 'fill-current' : ''} />
                     </button>
                   </div>
-                </Link>
-                <div className="p-4">
-                  <Link to={`/product/${product._id}`}>
-                    <h3 className="text-lg font-semibold text-white hover:text-pink-400 truncate">
+                  
+                  <div className="px-1">
+                    <p className="text-xs text-muted-foreground mb-1 font-medium">{product.category?.name || 'Uncategorized'}</p>
+                    <h3 className="text-base font-semibold text-foreground truncate group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-serif)' }}>
                       {product.name}
                     </h3>
-                  </Link>
-                  <p className="text-sm text-gray-400 mt-1">
-                    {product.category?.name || 'Uncategorized'}
-                  </p>
-                  {product.shortDesc && (
-                    <p className="text-sm text-gray-400 mt-2 line-clamp-2">
-                      {product.shortDesc}
-                    </p>
-                  )}
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold text-pink-500">
+                    
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-base font-bold text-foreground">
                         ${product.price}
                       </span>
                       {product.comparePrice && product.comparePrice > product.price && (
-                        <span className="text-sm text-gray-500 line-through">
+                        <span className="text-xs text-muted-foreground line-through font-medium">
                           ${product.comparePrice}
                         </span>
                       )}
                     </div>
                   </div>
-                  {!isAuthenticated && (
-                    <p className="text-xs text-orange-400 mt-2">
-                      Login to add to cart
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

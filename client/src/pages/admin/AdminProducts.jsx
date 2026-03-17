@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { productAPI, categoryAPI } from '../../services/api';
+import { Star, Heart, Package, Edit, Trash2, X } from 'lucide-react';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -103,9 +104,17 @@ const AdminProducts = () => {
     }
   };
 
-  const handleViewDetails = (product) => {
-    setSelectedProduct(product);
-    setShowDetailModal(true);
+  const handleViewDetails = async (product) => {
+    try {
+      // Fetch the full product with ratings and wishlist
+      const response = await productAPI.getById(product._id);
+      setSelectedProduct(response.data);
+      setShowDetailModal(true);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      setSelectedProduct(product);
+      setShowDetailModal(true);
+    }
   };
 
   const resetForm = () => {
@@ -379,10 +388,10 @@ const AdminProducts = () => {
 
       {/* Detail Modal */}
       {showDetailModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex gap-6">
-              <div className="w-1/2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex gap-6 flex-col md:flex-row">
+              <div className="w-full md:w-1/2">
                 {selectedProduct.image ? (
                   <img
                     src={`http://localhost:5007/uploads/product/${selectedProduct.image}`}
@@ -395,7 +404,7 @@ const AdminProducts = () => {
                   </div>
                 )}
               </div>
-              <div className="w-1/2">
+              <div className="w-full md:w-1/2">
                 <h2 className="text-2xl font-bold mb-2">{selectedProduct.name}</h2>
                 <p className="text-sm text-gray-500 mb-2">
                   Category: {getCategoryName(selectedProduct.category)}
@@ -420,22 +429,59 @@ const AdminProducts = () => {
                 </div>
                 {selectedProduct.shortDesc && (
                   <div className="mb-2">
-                    <h3 className="font-semibold">Short Description</h3>
-                    <p className="text-gray-600">{selectedProduct.shortDesc}</p>
+                    <h3 className="font-semibold text-sm">Short Description</h3>
+                    <p className="text-gray-600 text-sm">{selectedProduct.shortDesc}</p>
                   </div>
                 )}
                 {selectedProduct.longDesc && (
                   <div>
-                    <h3 className="font-semibold">Long Description</h3>
-                    <p className="text-gray-600">{selectedProduct.longDesc}</p>
+                    <h3 className="font-semibold text-sm">Long Description</h3>
+                    <p className="text-gray-600 text-sm">{selectedProduct.longDesc}</p>
                   </div>
                 )}
+                
+                {/* Ratings & Reviews */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <Star size={16} className="text-yellow-500" />
+                    Reviews ({selectedProduct.ratings?.length || 0})
+                  </h3>
+                  {selectedProduct.ratings && selectedProduct.ratings.length > 0 ? (
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {selectedProduct.ratings.map((rating, idx) => (
+                        <div key={idx} className="bg-gray-50 p-2 rounded text-sm">
+                          <div className="flex items-center gap-1 mb-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                size={12}
+                                className={`${star <= rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                              />
+                            ))}
+                            <span className="text-xs text-gray-500 ml-1">{rating.user?.name || 'Anonymous'}</span>
+                          </div>
+                          {rating.comment && <p className="text-gray-600 text-xs">{rating.comment}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">No reviews yet</p>
+                  )}
+                </div>
+
+                {/* Wishlist Count */}
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 flex items-center gap-1">
+                    <Heart size={14} className="text-red-500" />
+                    {selectedProduct.wishList?.length || 0} users in wishlist
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 Close
               </button>

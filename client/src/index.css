@@ -1,1 +1,67 @@
 @import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;500;700&display=swap');
+
+@theme {
+  --color-background: hsl(30 33% 96%);
+  --color-foreground: hsl(20 20% 20%);
+  
+  --color-card: hsl(30 25% 97%);
+  --color-card-foreground: hsl(20 20% 20%);
+  
+  --color-popover: hsl(30 25% 97%);
+  --color-popover-foreground: hsl(20 20% 20%);
+  
+  --color-primary: hsl(20 40% 35%);
+  --color-primary-foreground: hsl(30 33% 96%);
+  
+  --color-secondary: hsl(25 30% 90%);
+  --color-secondary-foreground: hsl(20 20% 20%);
+  
+  --color-muted: hsl(25 20% 92%);
+  --color-muted-foreground: hsl(20 10% 50%);
+  
+  --color-accent: hsl(20 60% 55%);
+  --color-accent-foreground: hsl(30 33% 96%);
+  
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+  
+  --color-border: hsl(25 20% 88%);
+  --color-input: hsl(25 20% 88%);
+  --color-ring: hsl(20 40% 35%);
+  
+  --radius-sm: calc(0.5rem - 4px);
+  --radius-md: calc(0.5rem - 2px);
+  --radius-lg: 0.5rem;
+  --radius-xl: calc(0.5rem + 4px);
+}
+
+@layer base {
+  :root {
+    --background: hsl(30 33% 96%);
+    --foreground: hsl(20 20% 20%);
+    --border: hsl(25 20% 88%);
+    --accent: hsl(20 60% 55%);
+    --accent-foreground: hsl(30 33% 96%);
+    --font-sans: 'Lato', system-ui, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+}
