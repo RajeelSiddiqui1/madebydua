@@ -58,7 +58,12 @@ const productSchema = new Schema(
     image: {
       type: String,
       default: "",
-    }
+    },
+
+    quantity: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

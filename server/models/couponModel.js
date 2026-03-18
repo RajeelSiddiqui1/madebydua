@@ -37,6 +37,16 @@ const couponSchema = new Schema(
       type: Boolean,
       default: true,
     },
+
+    quantity: {
+      type: Number,
+      default: null, // null means unlimited
+    },
+
+    usedCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

@@ -18,6 +18,16 @@ const orderSchema = new Schema(
       default: "pending",
     },
     shippingAddress: { type: String, required: true },
+
+    coupons: [
+      {
+        coupon: { type: Schema.Types.ObjectId, ref: "Coupon" },
+        product: { type: Schema.Types.ObjectId, ref: "Product" },
+        discount: { type: Number, default: 0 },
+      },
+    ],
+
+    discountAmount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

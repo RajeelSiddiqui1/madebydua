@@ -140,7 +140,7 @@ const AdminCategories = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {category.image ? (
                     <img 
-                      src={`http://localhost:5007/uploads/category/${category.image}`} 
+                      src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_CATEGORY}/${category.image}`} 
                       alt={category.name} 
                       className="w-12 h-12 rounded object-cover"
                     />
@@ -224,7 +224,7 @@ const AdminCategories = () => {
                 {editingCategory?.image && !imageFile && (
                   <div className="mb-2">
                     <img 
-                      src={`http://localhost:5007/uploads/category/${editingCategory.image}`} 
+                      src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_CATEGORY}/${category.image}`} 
                       alt={editingCategory.name} 
                       className="h-20 w-20 object-cover rounded" 
                     />

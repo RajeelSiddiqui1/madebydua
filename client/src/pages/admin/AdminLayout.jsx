@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut } from 'lucide-react';
+import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut, Receipt } from 'lucide-react';
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -17,6 +17,7 @@ const AdminLayout = () => {
     { path: '/page/admin', label: 'Dashboard', icon: Home, exact: true },
     { path: '/page/admin/categories', label: 'Categories', icon: Tag },
     { path: '/page/admin/products', label: 'Products', icon: Package },
+    { path: '/page/admin/orders', label: 'Orders', icon: Receipt },
     { path: '/page/admin/coupons', label: 'Coupons', icon: Tag },
   ];
 

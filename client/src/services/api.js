@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5007/api';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5007/api';
+const UPLOADS_URL = import.meta.env.VITE_BACKEND_URL ? 
+  import.meta.env.VITE_BACKEND_URL.replace('/api', '/uploads') : 
+  'http://localhost:5007/uploads';
+
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${UPLOADS_URL}/${imagePath}`;
+};
 
 const api = axios.create({
   baseURL: API_URL,
@@ -55,7 +64,10 @@ export const productAPI = {
 export const couponAPI = {
   getAll: () => api.get('/coupon'),
   create: (data) => api.post('/coupon', data),
+  update: (id, data) => api.put(`/coupon/${id}`, data),
   apply: (data) => api.post('/coupon/apply', data),
+  validate: (data) => api.post('/coupon/validate', data),
+  applyMultiple: (data) => api.post('/coupon/apply-multiple', data),
   delete: (id) => api.delete(`/coupon/${id}`),
 };
 
@@ -82,7 +94,7 @@ export const cartAPI = {
 
 // Order APIs
 export const orderAPI = {
-  checkout: (shippingAddress) => api.post('/order/checkout', { shippingAddress }),
+  checkout: (shippingAddress, coupons) => api.post('/order/checkout', { shippingAddress, coupons }),
   getOrders: () => api.get('/order'),
   getAllOrders: () => api.get('/order/all'),
 };

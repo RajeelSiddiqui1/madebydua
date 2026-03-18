@@ -103,7 +103,7 @@ const UserDashboard = () => {
 
   const getImageUrl = (item) => {
     if (item.image && item.image.startsWith('http')) return item.image;
-    return item.image ? `http://localhost:5007/uploads/product/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+    return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
   };
 
   if (loading) {

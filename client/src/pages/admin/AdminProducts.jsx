@@ -19,6 +19,7 @@ const AdminProducts = () => {
     category: '',
     isFeatured: false,
     active: true,
+    quantity: 0,
     image: null,
   });
 
@@ -58,6 +59,7 @@ const AdminProducts = () => {
     data.append('category', formData.category);
     data.append('isFeatured', formData.isFeatured);
     data.append('active', formData.active);
+    data.append('quantity', formData.quantity || 0);
     if (formData.image) {
       data.append('image', formData.image);
     }
@@ -88,6 +90,7 @@ const AdminProducts = () => {
       category: product.category._id || product.category,
       isFeatured: product.isFeatured || false,
       active: product.active !== false,
+      quantity: product.quantity || 0,
       image: null,
     });
     setShowModal(true);
@@ -101,6 +104,35 @@ const AdminProducts = () => {
       } catch (error) {
         console.error('Error deleting product:', error);
       }
+    }
+  };
+
+  const toggleProductStatus = async (product) => {
+    try {
+      const newStatus = !product.active;
+      const data = new FormData();
+      data.append('active', newStatus);
+      data.append('name', product.name);
+      data.append('price', product.price);
+      await productAPI.update(product._id, data);
+      fetchProducts();
+    } catch (error) {
+      console.error('Error toggling product status:', error);
+    }
+  };
+
+  const updateProductQuantity = async (product, newQty) => {
+    const qty = parseInt(newQty);
+    if (isNaN(qty) || qty < 0) return;
+    try {
+      const data = new FormData();
+      data.append('quantity', qty);
+      data.append('name', product.name);
+      data.append('price', product.price);
+      await productAPI.update(product._id, data);
+      fetchProducts();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
     }
   };
 
@@ -127,6 +159,7 @@ const AdminProducts = () => {
       category: '',
       isFeatured: false,
       active: true,
+      quantity: 0,
       image: null,
     });
   };
@@ -177,6 +210,9 @@ const AdminProducts = () => {
                 Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Quantity
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Featured
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -193,7 +229,7 @@ const AdminProducts = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   {product.image ? (
                     <img
-                      src={`http://localhost:5007/uploads/product/${product.image}`}
+                      src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${product.image}`}
                       alt={product.name}
                       className="h-12 w-12 object-cover rounded"
                     />
@@ -211,10 +247,34 @@ const AdminProducts = () => {
                   ${product.price}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="number"
+                    min="0"
+                    defaultValue={product.quantity || 0}
+                    onBlur={(e) => updateProductQuantity(product, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        updateProductQuantity(product, e.target.value);
+                        e.target.blur();
+                      }
+                    }}
+                    className="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   {product.isFeatured ? 'Yes' : 'No'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {product.active ? 'Yes' : 'No'}
+                  <button
+                    onClick={() => toggleProductStatus(product)}
+                    className={`px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 ${
+                      product.active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {product.active ? 'Active' : 'Inactive'}
+                  </button>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
@@ -307,6 +367,18 @@ const AdminProducts = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Quantity (Stock)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                  />
+                </div>
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -394,7 +466,7 @@ const AdminProducts = () => {
               <div className="w-full md:w-1/2">
                 {selectedProduct.image ? (
                   <img
-                    src={`http://localhost:5007/uploads/product/${selectedProduct.image}`}
+                    src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${selectedProduct.image}`}
                     alt={selectedProduct.name}
                     className="w-full h-64 object-cover rounded-lg"
                   />
@@ -426,6 +498,12 @@ const AdminProducts = () => {
                   <span className={`px-2 py-1 text-xs rounded ${selectedProduct.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {selectedProduct.active ? 'Active' : 'Inactive'}
                   </span>
+                </div>
+                <div className="mb-2">
+                  <p className="text-sm font-semibold text-gray-500">Stock Quantity</p>
+                  <p className={`text-lg font-bold ${selectedProduct.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {selectedProduct.quantity || 0} units
+                  </p>
                 </div>
                 {selectedProduct.shortDesc && (
                   <div className="mb-2">

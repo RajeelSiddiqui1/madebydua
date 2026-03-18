@@ -29,12 +29,12 @@ const ProductDetail = () => {
           productAPI.getAll(),
           categoryAPI.getAll(),
         ]);
-        
+
         const allProducts = productRes.data || [];
         const foundProduct = allProducts.find((p) => p._id === id);
         setProduct(foundProduct || null);
         setCategories(categoriesRes.data || []);
-        
+
         if (foundProduct) {
           const related = allProducts.filter(
             (p) =>
@@ -77,7 +77,7 @@ const ProductDetail = () => {
           const response = await ratingAPI.getProductRatings(product._id);
           setRatings(response.data.ratings || []);
           setAverageRating(response.data.averageRating || 0);
-          
+
           // Check if user has already rated
           if (user) {
             const existingRating = response.data.ratings?.find(
@@ -158,6 +158,14 @@ const ProductDetail = () => {
     return <div className="text-center py-8">Loading...</div>;
   }
 
+
+  const getImageUrl = (item) => {
+    if (item.image && item.image.startsWith('http')) {
+      return item.image;
+    }
+    return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+  };
+
   if (!product) {
     return (
       <div className="text-center py-12">
@@ -190,16 +198,22 @@ const ProductDetail = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         {/* Product Image */}
-        <div className="bg-gray-100 rounded-lg overflow-hidden">
+        <div className="bg-gray-100 rounded-lg overflow-hidden relative">
           {product.image ? (
             <img
-              src={`http://localhost:5007/uploads/product/${product.image}`}
+              src={ `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${product.image}`}
               alt={product.name}
               className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-96 flex items-center justify-center text-gray-400">
               No Image Available
+            </div>
+          )}
+          {/* Out of Stock Badge */}
+          {(!product.quantity || product.quantity <= 0) && (
+            <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
+              OUT OF STOCK
             </div>
           )}
         </div>
@@ -212,7 +226,7 @@ const ProductDetail = () => {
           {categoryName && (
             <p className="text-sm text-gray-500 mb-2">Category: {categoryName}</p>
           )}
-          
+
           {/* Rating Display */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center gap-1">
@@ -220,11 +234,10 @@ const ProductDetail = () => {
                 <Star
                   key={star}
                   size={18}
-                  className={` ${
-                    star <= Math.round(averageRating)
+                  className={` ${star <= Math.round(averageRating)
                       ? 'fill-yellow-400 text-yellow-400'
                       : 'text-gray-300'
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -232,7 +245,7 @@ const ProductDetail = () => {
               {averageRating.toFixed(1)} ({ratings.length} {ratings.length === 1 ? 'review' : 'reviews'})
             </span>
           </div>
-          
+
           <div className="flex items-center gap-4 mb-6">
             <span className="text-3xl font-bold text-blue-600">
               ${product.price}
@@ -259,7 +272,7 @@ const ProductDetail = () => {
           <div className="mt-8 flex gap-4">
             {isAuthenticated ? (
               <>
-                <button 
+                <button
                   onClick={handleAddToCart}
                   disabled={cartLoading}
                   className={`bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 ${addedToCart ? 'bg-green-600' : ''}`}
@@ -267,14 +280,13 @@ const ProductDetail = () => {
                   <ShoppingBag size={20} />
                   {addedToCart ? 'Added!' : cartLoading ? 'Adding...' : 'Add to Cart'}
                 </button>
-                <button 
+                <button
                   onClick={handleWishlistToggle}
                   disabled={wishlistLoading}
-                  className={`p-3 rounded-lg border-2 transition-colors flex items-center gap-2 ${
-                    isInWishlist 
-                      ? 'border-red-500 text-red-500 bg-red-50' 
+                  className={`p-3 rounded-lg border-2 transition-colors flex items-center gap-2 ${isInWishlist
+                      ? 'border-red-500 text-red-500 bg-red-50'
                       : 'border-gray-300 hover:border-red-500 hover:text-red-500'
-                  }`}
+                    }`}
                 >
                   <Heart size={20} className={isInWishlist ? 'fill-current' : ''} />
                   {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
@@ -313,11 +325,10 @@ const ProductDetail = () => {
                   >
                     <Star
                       size={32}
-                      className={` ${
-                        star <= userRating
+                      className={` ${star <= userRating
                           ? 'fill-yellow-400 text-yellow-400'
                           : 'text-gray-300 hover:text-yellow-200'
-                      } transition-colors`}
+                        } transition-colors`}
                     />
                   </button>
                 ))}
@@ -361,11 +372,10 @@ const ProductDetail = () => {
                           <Star
                             key={star}
                             size={16}
-                            className={` ${
-                              star <= rating.rating
+                            className={` ${star <= rating.rating
                                 ? 'fill-yellow-400 text-yellow-400'
                                 : 'text-gray-300'
-                            }`}
+                              }`}
                           />
                         ))}
                       </div>
@@ -398,8 +408,11 @@ const ProductDetail = () => {
                 <div className="h-48 bg-gray-200">
                   {relProduct.image ? (
                     <img
-                      src={`http://localhost:5007/uploads/product/${relProduct.image}`}
-                      alt={relProduct.name}
+                      src={
+                      
+                          `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${relProduct.image}`
+                         } 
+                      alt={relProduct.name || "Product"}
                       className="w-full h-full object-cover"
                     />
                   ) : (

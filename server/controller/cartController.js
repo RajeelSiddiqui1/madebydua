@@ -10,7 +10,29 @@ export const addToCart = async (req, res) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
+    // Check if product is active
+    if (product.active === false) {
+      return res.status(400).json({ message: "Product is not available" });
+    }
+
+    // Check stock availability
+    const availableQty = product.quantity || 0;
+    let currentCartQty = 0;
+
     let cart = await Cart.findOne({ user: userId });
+    if (cart) {
+      const existingItem = cart.products.find((p) => p.product.toString() === productId);
+      if (existingItem) {
+        currentCartQty = existingItem.quantity;
+      }
+    }
+
+    const totalRequested = currentCartQty + quantity;
+    if (availableQty < totalRequested) {
+      return res.status(400).json({ 
+        message: `Only ${availableQty} items available in stock. You already have ${currentCartQty} in your cart.` 
+      });
+    }
 
     if (!cart) {
       cart = await Cart.create({ user: userId, products: [{ product: productId, quantity }] });
@@ -46,6 +68,16 @@ export const updateCartItem = async (req, res) => {
     if (quantity <= 0) {
       cart.products.splice(itemIndex, 1); // remove item if quantity is 0
     } else {
+      // Check stock availability
+      const product = await Product.findById(productId);
+      if (product) {
+        const availableQty = product.quantity || 0;
+        if (availableQty < quantity) {
+          return res.status(400).json({ 
+            message: `Only ${availableQty} items available in stock` 
+          });
+        }
+      }
       cart.products[itemIndex].quantity = quantity;
     }
 

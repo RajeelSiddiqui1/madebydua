@@ -56,7 +56,7 @@ export const updateProduct = async (req, res) => {
     }
 
     // Update other fields manually to avoid overwriting image
-    const { name, shortDesc, longDesc, price, comparePrice, category, isFeatured, active } = req.body;
+    const { name, shortDesc, longDesc, price, comparePrice, category, isFeatured, active, quantity } = req.body;
     if (name) product.name = name;
     if (shortDesc) product.shortDesc = shortDesc;
     if (longDesc) product.longDesc = longDesc;
@@ -65,6 +65,7 @@ export const updateProduct = async (req, res) => {
     if (category) product.category = category;
     if (isFeatured !== undefined) product.isFeatured = isFeatured;
     if (active !== undefined) product.active = active;
+    if (quantity !== undefined) product.quantity = quantity;
 
     await product.save();
     res.json(product);

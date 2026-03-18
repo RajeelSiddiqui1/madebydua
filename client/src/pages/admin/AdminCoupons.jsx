@@ -16,6 +16,8 @@ const AdminCoupons = () => {
     minQuantity: 1,
     expiryDate: '',
     active: true,
+    quantity: null,
+    products: [],
   });
 
   const fetchCoupons = async () => {
@@ -45,11 +47,13 @@ const AdminCoupons = () => {
       minQuantity: Number(formData.minQuantity),
       expiryDate: formData.expiryDate || null,
       active: formData.active,
+      quantity: formData.quantity ? Number(formData.quantity) : null,
+      products: formData.products,
     };
 
     try {
       if (editingCoupon) {
-        alert('Update not implemented on server');
+        await couponAPI.update(editingCoupon._id, data);
       } else {
         await couponAPI.create(data);
       }
@@ -73,6 +77,15 @@ const AdminCoupons = () => {
     }
   };
 
+  const toggleCouponStatus = async (coupon) => {
+    try {
+      await couponAPI.update(coupon._id, { active: !coupon.active });
+      fetchCoupons();
+    } catch (error) {
+      console.error('Error toggling coupon status:', error);
+    }
+  };
+
   const handleViewDetails = (coupon) => {
     setSelectedCoupon(coupon);
     // Get products associated with this coupon
@@ -87,6 +100,11 @@ const AdminCoupons = () => {
     setShowDetailModal(true);
   };
 
+  const handleProductSelect = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setFormData({ ...formData, products: selectedOptions });
+  };
+
   const resetForm = () => {
     setFormData({
       code: '',
@@ -94,6 +112,8 @@ const AdminCoupons = () => {
       minQuantity: 1,
       expiryDate: '',
       active: true,
+      quantity: null,
+      products: [],
     });
   };
 
@@ -140,6 +160,12 @@ const AdminCoupons = () => {
                 Discount %
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Qty Limit
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Used
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Min Qty
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -160,6 +186,7 @@ const AdminCoupons = () => {
             {coupons.map((coupon) => {
               const productCount = coupon.products?.length || 0;
               const expired = isExpired(coupon.expiryDate);
+              const isUnlimited = coupon.quantity === null;
               
               return (
                 <tr key={coupon._id}>
@@ -168,6 +195,12 @@ const AdminCoupons = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {coupon.discountPercent}%
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {isUnlimited ? '∞' : coupon.quantity}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {coupon.usedCount || 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {coupon.minQuantity}
@@ -179,19 +212,20 @@ const AdminCoupons = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">
-                      {productCount} Products
+                      {productCount === 0 ? 'All' : `${productCount} Products`}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    <button
+                      onClick={() => toggleCouponStatus(coupon)}
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80 ${
                         coupon.active && !expired
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
                       {coupon.active && !expired ? 'Active' : 'Inactive'}
-                    </span>
+                    </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
@@ -199,6 +233,24 @@ const AdminCoupons = () => {
                       className="text-green-600 hover:text-green-900 mr-4"
                     >
                       View Details
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingCoupon(coupon);
+                        setFormData({
+                          code: coupon.code,
+                          discountPercent: coupon.discountPercent,
+                          minQuantity: coupon.minQuantity || 1,
+                          expiryDate: coupon.expiryDate ? coupon.expiryDate.split('T')[0] : '',
+                          active: coupon.active,
+                          quantity: coupon.quantity,
+                          products: coupon.products || [],
+                        });
+                        setShowModal(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-900 mr-4"
+                    >
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDelete(coupon._id)}
@@ -220,7 +272,7 @@ const AdminCoupons = () => {
       {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
               {editingCoupon ? 'Edit Coupon' : 'Add Coupon'}
             </h2>
@@ -253,6 +305,19 @@ const AdminCoupons = () => {
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Quantity Limit (leave empty for unlimited)
+                </label>
+                <input
+                  type="number"
+                  value={formData.quantity || ''}
+                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value ? Number(e.target.value) : null })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="1"
+                  placeholder="Unlimited"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
                   Minimum Quantity
                 </label>
                 <input
@@ -273,6 +338,26 @@ const AdminCoupons = () => {
                   onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Apply to Products (leave empty for all products)
+                </label>
+                <select
+                  multiple
+                  value={formData.products}
+                  onChange={handleProductSelect}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 h-40"
+                >
+                  {products.map((product) => (
+                    <option key={product._id} value={product._id}>
+                      {product.name} - ${product.price}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Hold Ctrl/Cmd to select multiple products
+                </p>
               </div>
               <div className="mb-4">
                 <label className="flex items-center">
@@ -317,6 +402,16 @@ const AdminCoupons = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">Discount</p>
                 <p className="text-2xl font-bold text-green-600">{selectedCoupon.discountPercent}% OFF</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-500">Quantity Limit</p>
+                <p className="text-2xl font-bold">
+                  {selectedCoupon.quantity === null ? '∞ Unlimited' : selectedCoupon.quantity}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-500">Used Count</p>
+                <p className="text-2xl font-bold">{selectedCoupon.usedCount || 0}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-500">Minimum Quantity</p>

@@ -87,12 +87,12 @@ const Home = () => {
     if (item.image && item.image.startsWith('http')) {
       return item.image;
     }
-    return item.image ? `http://localhost:5007/uploads/product/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+    return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
   };
 
   const getCategoryImage = (item) => {
     if (item.image && item.image.startsWith('http')) return item.image;
-    if (item.image) return `http://localhost:5007/uploads/category/${item.image}`;
+    if (item.image) return `${import.meta.env.VITE_BACKEND_URL_PRODUCT_CATEGORY}/${item.image}`;
     return staticCategories[Math.floor(Math.random() * staticCategories.length)].image;
   };
 
@@ -162,7 +162,7 @@ const Home = () => {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {displayCategories.map((cat, idx) => (
-             <Link key={cat._id || idx} to={`/page/user?category=${cat._id || cat.name}`} className="group relative rounded-xl overflow-hidden aspect-square">
+             <Link key={cat._id || idx} to={`/shop?category=${cat._id || cat.name}`} className="group relative rounded-xl overflow-hidden aspect-square">
               <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               <div className="absolute inset-0 bg-foreground/30 group-hover:bg-foreground/40 transition-colors" />
               <div className="absolute inset-0 flex items-center justify-center">

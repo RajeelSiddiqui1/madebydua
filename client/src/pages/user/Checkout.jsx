@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { cartAPI, orderAPI } from '../../services/api';
+import { cartAPI, orderAPI, couponAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { ArrowLeft, CreditCard, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CreditCard, CheckCircle, Tag, X, Check } from 'lucide-react';
 
 const Checkout = () => {
   const [cart, setCart] = useState({ products: [] });
@@ -17,6 +17,14 @@ const Checkout = () => {
     zipCode: '',
     country: 'Pakistan'
   });
+  
+  // Coupon state
+  const [productCoupons, setProductCoupons] = useState({});
+  const [couponInputs, setCouponInputs] = useState({});
+  const [couponErrors, setCouponErrors] = useState({});
+  const [couponLoading, setCouponLoading] = useState({});
+  const [appliedCoupons, setAppliedCoupons] = useState({});
+  
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
@@ -24,6 +32,18 @@ const Checkout = () => {
     try {
       const response = await cartAPI.getCart();
       setCart(response.data || { products: [] });
+      // Initialize coupon state for each cart item
+      const initialCoupons = {};
+      const initialInputs = {};
+      (response.data?.products || []).forEach(item => {
+        const productId = item.product?._id;
+        if (productId) {
+          initialCoupons[productId] = null;
+          initialInputs[productId] = '';
+        }
+      });
+      setProductCoupons(initialCoupons);
+      setCouponInputs(initialInputs);
     } catch (error) {
       console.error('Error fetching cart:', error);
     } finally {
@@ -43,6 +63,82 @@ const Checkout = () => {
     }, 0);
   };
 
+  const calculateDiscount = () => {
+    let totalDiscount = 0;
+    Object.values(appliedCoupons).forEach(coupon => {
+      if (coupon) {
+        totalDiscount += coupon.discount || 0;
+      }
+    });
+    return totalDiscount;
+  };
+
+  const calculateFinalTotal = () => {
+    return calculateTotal() - calculateDiscount();
+  };
+
+  const handleCouponInputChange = (productId, value) => {
+    setCouponInputs(prev => ({ ...prev, [productId]: value }));
+  };
+
+  const applyCouponForProduct = async (productId) => {
+    const code = couponInputs[productId]?.trim();
+    if (!code) return;
+
+    setCouponLoading(prev => ({ ...prev, [productId]: true }));
+    setCouponErrors(prev => ({ ...prev, [productId]: '' }));
+
+    try {
+      // Find the cart item to get quantity
+      const cartItem = cart.products.find(item => item.product?._id === productId);
+      const quantity = cartItem?.quantity || 1;
+
+      const response = await couponAPI.validate({
+        code,
+        productId,
+        quantity
+      });
+
+      if (response.data) {
+        setAppliedCoupons(prev => ({
+          ...prev,
+          [productId]: {
+            ...response.data,
+            code: response.data.coupon?.code || code
+          }
+        }));
+        setProductCoupons(prev => ({
+          ...prev,
+          [productId]: response.data
+        }));
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Invalid coupon';
+      setCouponErrors(prev => ({ ...prev, [productId]: message }));
+      setAppliedCoupons(prev => {
+        const newCoupons = { ...prev };
+        delete newCoupons[productId];
+        return newCoupons;
+      });
+    } finally {
+      setCouponLoading(prev => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const removeCoupon = (productId) => {
+    setAppliedCoupons(prev => {
+      const newCoupons = { ...prev };
+      delete newCoupons[productId];
+      return newCoupons;
+    });
+    setCouponInputs(prev => ({ ...prev, [productId]: '' }));
+    setCouponErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[productId];
+      return newErrors;
+    });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setShippingAddress(prev => ({ ...prev, [name]: value }));
@@ -54,7 +150,14 @@ const Checkout = () => {
     
     try {
       const addressString = `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}, ${shippingAddress.country}`;
-      const response = await orderAPI.checkout(addressString);
+      
+      // Prepare coupons data
+      const couponsData = Object.entries(appliedCoupons).map(([productId, couponData]) => ({
+        code: couponData.code,
+        productId,
+      }));
+
+      const response = await orderAPI.checkout(addressString, couponsData);
       setOrderId(response.data.order._id);
       setOrderComplete(true);
     } catch (error) {
@@ -67,7 +170,18 @@ const Checkout = () => {
 
   const getImageUrl = (item) => {
     if (item.image && item.image.startsWith('http')) return item.image;
-    return item.image ? `http://localhost:5007/uploads/product/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+    return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+  };
+
+  const getItemDiscount = (item) => {
+    const productId = item.product?._id;
+    const coupon = appliedCoupons[productId];
+    return coupon?.discount || 0;
+  };
+
+  const getItemFinalPrice = (item) => {
+    const originalPrice = (item.product?.price || 0) * item.quantity;
+    return originalPrice - getItemDiscount(item);
   };
 
   if (loading) {
@@ -221,6 +335,84 @@ const Checkout = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Product Coupons Section */}
+              <div className="bg-card rounded-lg border border-border p-4">
+                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ fontFamily: 'var(--font-serif)' }}>
+                  <Tag size={18} className="text-accent" />
+                  Apply Coupons
+                </h2>
+                <p className="text-xs text-muted-foreground mb-4">
+                  You can apply a different coupon to each product
+                </p>
+                
+                <div className="space-y-3">
+                  {cart.products.map((item) => {
+                    const productId = item.product?._id;
+                    const hasCoupon = appliedCoupons[productId];
+                    const isLoading = couponLoading[productId];
+                    const error = couponErrors[productId];
+
+                    return (
+                      <div key={productId} className="border rounded-lg p-3">
+                        <div className="flex gap-3 items-center">
+                          <img
+                            src={getImageUrl(item.product)}
+                            alt={item.product?.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{item.product?.name}</p>
+                            <p className="text-xs text-muted-foreground">Qty: {item.quantity} × ${item.product?.price}</p>
+                          </div>
+                          
+                          {hasCoupon ? (
+                            <div className="flex items-center gap-2">
+                              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                                {hasCoupon.code} (-${hasCoupon.discount?.toFixed(2)})
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeCoupon(productId)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                placeholder="Enter coupon"
+                                value={couponInputs[productId] || ''}
+                                onChange={(e) => handleCouponInputChange(productId, e.target.value)}
+                                className="w-28 px-2 py-1 text-sm rounded border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => applyCouponForProduct(productId)}
+                                disabled={isLoading || !couponInputs[productId]}
+                                className="px-2 py-1 bg-accent text-accent-foreground rounded text-sm hover:opacity-90 disabled:opacity-50"
+                              >
+                                {isLoading ? '...' : <Check size={14} />}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {error && (
+                          <p className="text-red-500 text-xs mt-2">{error}</p>
+                        )}
+                        {hasCoupon && (
+                          <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                            <Check size={12} />
+                            Coupon applied! You save ${hasCoupon.discount?.toFixed(2)}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* Order Summary */}
@@ -241,7 +433,16 @@ const Checkout = () => {
                         <p className="font-medium text-xs truncate">{item.product?.name}</p>
                         <p className="text-muted-foreground text-xs">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-medium text-sm">${((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
+                      <div className="text-right">
+                        {getItemDiscount(item) > 0 ? (
+                          <>
+                            <p className="font-medium text-xs line-through text-gray-400">${((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
+                            <p className="font-medium text-xs text-green-600">${getItemFinalPrice(item).toFixed(2)}</p>
+                          </>
+                        ) : (
+                          <p className="font-medium text-sm">${((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -251,17 +452,23 @@ const Checkout = () => {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>${calculateTotal().toFixed(2)}</span>
                   </div>
+                  {calculateDiscount() > 0 && (
+                    <div className="flex justify-between text-xs text-green-600">
+                      <span>Discount</span>
+                      <span>-${calculateDiscount().toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Shipping</span>
                     <span>Free</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Tax</span>
-                    <span>${(calculateTotal() * 0.1).toFixed(2)}</span>
+                    <span>${(calculateFinalTotal() * 0.1).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-sm pt-2 border-t border-border">
                     <span>Total</span>
-                    <span>${(calculateTotal() * 1.1).toFixed(2)}</span>
+                    <span>${(calculateFinalTotal() * 1.1).toFixed(2)}</span>
                   </div>
                 </div>
 

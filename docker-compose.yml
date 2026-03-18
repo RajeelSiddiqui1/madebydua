@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  backend: 
+   build: ./server
+   container_name: madebydua_backend
+   ports:
+     - 5007:5007
+
+   env_file:
+     - ./server/.env
+
+  frontend: 
+   build: ./client
+   container_name: madebydua_frontend
+   ports:
+     - 51720:80
+
+   env_file:
+     - ./server/.env  
+
+  
