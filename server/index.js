@@ -27,9 +27,23 @@ app.use(express.json())
 await dbConnect()
 
 app.use(cors({
-  origin: ["http://localhost:5173","http://153.92.209.177:5180/"],
-  credentials: true 
+  origin: ["http://localhost:5173","http://153.92.209.177:5180"],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Explicit CORS headers for additional assurance
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://153.92.209.177:5180');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Serve static files from uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
