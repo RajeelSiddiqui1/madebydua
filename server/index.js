@@ -27,7 +27,7 @@ app.use(express.json())
 await dbConnect()
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173","http://153.92.209.177:5180/"],
   credentials: true 
 }));
 
