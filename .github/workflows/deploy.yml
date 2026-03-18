@@ -1,12 +1,9 @@
 name: Made By DUA App
 
 on:
- push:
-  branches:
-   - main
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -14,6 +11,17 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Test SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            echo "SSH connection works"
+            whoami
 
       - name: Deploy Via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -24,7 +32,7 @@ jobs:
           port: 22
           script: |
             git config --global --add safe.directory /home/clinet-projects/madebydua
-            cd //home/clinet-projects/madebydua
+            cd /home/clinet-projects/madebydua
             git reset --hard
             git pull origin main
             docker-compose up -d --build
