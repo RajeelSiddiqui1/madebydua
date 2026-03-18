@@ -14,7 +14,7 @@ services:
    build: ./client
    container_name: madebydua_frontend
    ports:
-     - 51780:80
+     - 5180:80
 
    env_file:
      - ./server/.env  
