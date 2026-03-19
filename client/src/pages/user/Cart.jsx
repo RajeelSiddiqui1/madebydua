@@ -85,12 +85,12 @@ const Cart = () => {
       <section className="bg-secondary/50 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-2">
-            <Link 
-              to="/shop" 
+            <button 
+              onClick={() => navigate(-1)} 
               className="p-1.5 rounded-full bg-background border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               <ArrowLeft size={16} />
-            </Link>
+            </button>
             <h1 className="text-xl lg:text-2xl font-light" style={{ fontFamily: 'var(--font-serif)' }}>
               My <span className="italic text-accent">Cart</span>
             </h1>
@@ -134,7 +134,7 @@ const Cart = () => {
                       </h3>
                     </Link>
                     <p className="text-muted-foreground text-xs mb-1">
-                      ${item.product?.price}
+                      Rs.{item.product?.price}
                     </p>
                     
                     <div className="flex items-center justify-between">
@@ -149,7 +149,7 @@ const Cart = () => {
                         <span className="font-medium text-sm w-6 text-center">{item.quantity}</span>
                         <button
                           onClick={() => handleQuantityChange(item.product?._id, item.quantity + 1)}
-                          disabled={updating}
+                          disabled={updating || (item.product?.quantity !== undefined && item.quantity >= item.product.quantity)}
                           className="p-1 rounded border border-border hover:bg-accent hover:text-accent-foreground disabled:opacity-50 transition-colors"
                         >
                           <Plus size={12} />
@@ -158,7 +158,7 @@ const Cart = () => {
                       
                       <div className="flex items-center gap-3">
                         <span className="font-bold text-sm">
-                          ${calculateItemTotal(item).toFixed(2)}
+                          Rs.{calculateItemTotal(item).toFixed(2)}
                         </span>
                         <button
                           onClick={() => handleRemoveItem(item.product?._id)}
@@ -169,6 +169,16 @@ const Cart = () => {
                         </button>
                       </div>
                     </div>
+                    {item.product?.quantity !== undefined && item.quantity >= item.product.quantity && (
+                      <p className="text-xs text-red-500 mt-1">
+                        ✕ Sorry, only {item.product.quantity} available in stock
+                      </p>
+                    )}
+                    {item.product?.quantity !== undefined && item.quantity < item.product.quantity && item.product.quantity <= 5 && (
+                      <p className="text-xs text-orange-500 mt-1">
+                        ⚠ Only {item.product.quantity} left in stock
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -182,19 +192,12 @@ const Cart = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span>Rs.{calculateTotal().toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span>Free</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>${(calculateTotal() * 0.1).toFixed(2)}</span>
-                  </div>
+                  
                   <div className="border-t border-border pt-3 flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${(calculateTotal() * 1.1).toFixed(2)}</span>
+                    <span>Rs.{(calculateTotal() * 1.1).toFixed(2)}</span>
                   </div>
                 </div>
 

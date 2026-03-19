@@ -72,7 +72,7 @@ const AdminDashboard = () => {
     { title: 'Categories', count: stats.categories, color: 'bg-gradient-to-br from-green-500 to-green-600', icon: Tag, path: '/page/admin/categories' },
     { title: 'Users', count: stats.users, color: 'bg-gradient-to-br from-purple-500 to-purple-600', icon: Users, path: '/page/admin' },
     { title: 'Orders', count: stats.orders, color: 'bg-gradient-to-br from-orange-500 to-orange-600', icon: ShoppingBag, path: '/page/admin/orders' },
-    { title: 'Revenue', count: `${stats.totalRevenue.toFixed(2)}`, color: 'bg-gradient-to-br from-emerald-500 to-emerald-600', icon: DollarSign, path: '/page/admin' },
+    { title: 'Revenue', count: `Rs.${stats.totalRevenue.toFixed(2)}`, color: 'bg-gradient-to-br from-emerald-500 to-emerald-600', icon: DollarSign, path: '/page/admin' },
     { title: 'Coupons', count: stats.coupons, color: 'bg-gradient-to-br from-pink-500 to-pink-600', icon: Tag, path: '/page/admin/coupons' },
   ];
 
@@ -80,19 +80,19 @@ const AdminDashboard = () => {
     <div className="p-2">
       <h1 className="text-xl font-bold mb-4">Admin Dashboard</h1>
       
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+      {/* Stats Grid - Responsive */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3 mb-6">
         {cards.map((card, index) => (
           <Link
             key={index}
             to={card.path}
-            className={`${card.color} text-white rounded-xl p-5 shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1`}
+            className={`${card.color} text-white rounded-lg md:rounded-xl p-3 md:p-5 shadow-lg hover:shadow-xl transition-shadow transform hover:-translate-y-1`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <card.icon size={24} className="opacity-80" />
+            <div className="flex items-center justify-between mb-2 md:mb-3">
+              <card.icon size={20} md:size={24} className="opacity-80" />
             </div>
-            <p className="text-3xl font-bold">{card.count}</p>
-            <p className="text-white/80 text-sm">{card.title}</p>
+            <p className="text-xl md:text-3xl font-bold">{card.count}</p>
+            <p className="text-white/80 text-xs md:text-sm">{card.title}</p>
           </Link>
         ))}
       </div>
@@ -134,7 +134,9 @@ const AdminDashboard = () => {
         <div className="p-3 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-lg font-semibold">Recent Orders</h2>
         </div>
-        <div className="overflow-x-auto">
+        
+        {/* Table View - Desktop */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -157,7 +159,7 @@ const AdminDashboard = () => {
                     <td className="px-3 py-2 text-xs font-mono text-gray-600">{order._id?.slice(-8)}</td>
                     <td className="px-3 py-2 text-xs">{order.user?.firstName || 'Unknown'} {order.user?.lastName || ''}</td>
                     <td className="px-3 py-2 text-xs">{order.products?.length || 0} items</td>
-                    <td className="px-3 py-2 text-xs font-medium">${order.totalAmount?.toFixed(2)}</td>
+                    <td className="px-3 py-2 text-xs font-medium">Rs.{order.totalAmount?.toFixed(2)}</td>
                     <td className="px-3 py-2">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                         {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
@@ -171,6 +173,32 @@ const AdminDashboard = () => {
               )}
             </tbody>
           </table>
+        </div>
+        
+        {/* Card View - Mobile */}
+        <div className="md:hidden divide-y divide-gray-200">
+          {recentOrders.length === 0 ? (
+            <div className="p-4 text-center text-gray-500 text-sm">No orders yet</div>
+          ) : (
+            recentOrders.map((order) => (
+              <div key={order._id} className="p-3 hover:bg-gray-50">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-xs font-mono text-gray-600">#{order._id?.slice(-8)}</p>
+                    <p className="text-sm font-medium">{order.user?.firstName || 'Unknown'} {order.user?.lastName || ''}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                    {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">{order.products?.length || 0} items</span>
+                  <span className="text-sm font-bold">Rs.{order.totalAmount?.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

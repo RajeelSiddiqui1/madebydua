@@ -149,8 +149,8 @@ const AdminCoupons = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <table className="min-w-full whitespace-nowrap">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -351,7 +351,7 @@ const AdminCoupons = () => {
                 >
                   {products.map((product) => (
                     <option key={product._id} value={product._id}>
-                      {product.name} - ${product.price}
+                      {product.name} - Rs.{product.price}
                     </option>
                   ))}
                 </select>
@@ -458,7 +458,7 @@ const AdminCoupons = () => {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold">{product.name}</h4>
-                      <p className="text-blue-600 font-bold">${product.price}</p>
+                      <p className="text-blue-600 font-bold">Rs.{product.price}</p>
                     </div>
                   </div>
                 ))}

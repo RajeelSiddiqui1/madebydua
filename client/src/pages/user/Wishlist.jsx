@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { wishlistAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { Heart, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
@@ -8,6 +8,7 @@ const Wishlist = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const fetchWishlist = async () => {
     try {
@@ -57,12 +58,12 @@ const Wishlist = () => {
       <section className="bg-secondary/50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 mb-4">
-            <Link 
-              to="/shop" 
+            <button 
+              onClick={() => navigate(-1)} 
               className="p-2 rounded-full bg-background border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               <ArrowLeft size={20} />
-            </Link>
+            </button>
             <h1 className="text-3xl lg:text-4xl font-light" style={{ fontFamily: 'var(--font-serif)' }}>
               My <span className="italic text-accent">Wishlist</span>
             </h1>
@@ -122,11 +123,11 @@ const Wishlist = () => {
                   
                   <div className="mt-2 flex items-baseline gap-2">
                     <span className="text-base font-bold text-foreground">
-                      ${product.price}
+                      Rs.{product.price}
                     </span>
                     {product.comparePrice && product.comparePrice > product.price && (
                       <span className="text-xs text-muted-foreground line-through font-medium">
-                        ${product.comparePrice}
+                        Rs.{product.comparePrice}
                       </span>
                     )}
                   </div>

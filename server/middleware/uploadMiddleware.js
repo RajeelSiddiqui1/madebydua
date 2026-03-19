@@ -5,8 +5,9 @@ import fs from "fs";
 /**
  * Middleware to handle file uploads for different folders
  * @param {string} folder - 'product' or 'category'
+ * @param {number} maxCount - maximum number of files (default 10)
  */
-const upload = (folder) => {
+const upload = (folder, maxCount = 10) => {
   const uploadPath = path.join(process.cwd(), `uploads/${folder}`);
 
   // create folder if not exists
@@ -38,7 +39,7 @@ const upload = (folder) => {
     }
   };
 
-  return multer({ storage, fileFilter });
+  return multer({ storage, fileFilter, limits: { files: maxCount } });
 };
 
 export default upload;

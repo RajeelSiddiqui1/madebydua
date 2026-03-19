@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cartAPI, orderAPI, couponAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { ArrowLeft, CreditCard, CheckCircle, Tag, X, Check } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Tag, X, Check, Trash2, Upload, Building2, Smartphone } from 'lucide-react';
 
 const Checkout = () => {
   const [cart, setCart] = useState({ products: [] });
@@ -17,6 +17,11 @@ const Checkout = () => {
     zipCode: '',
     country: 'Pakistan'
   });
+  
+  // Payment method state
+  const [paymentMethod, setPaymentMethod] = useState('easy paisa');
+  const [paymentReceipt, setPaymentReceipt] = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState(null);
   
   // Coupon state
   const [productCoupons, setProductCoupons] = useState({});
@@ -75,6 +80,19 @@ const Checkout = () => {
 
   const calculateFinalTotal = () => {
     return calculateTotal() - calculateDiscount();
+  };
+
+  // Shipping charge
+  const SHIPPING_CHARGE = 200;
+  const FREE_SHIPPING_THRESHOLD = 2500;
+
+  const calculateShipping = () => {
+    const subtotal = calculateTotal() - calculateDiscount();
+    return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
+  };
+
+  const calculateGrandTotal = () => {
+    return calculateFinalTotal() + calculateShipping();
   };
 
   const handleCouponInputChange = (productId, value) => {
@@ -139,6 +157,36 @@ const Checkout = () => {
     });
   };
 
+  // Remove product from cart
+  const removeProductFromCart = async (productId) => {
+    if (window.confirm('Are you sure you want to remove this product from your cart?')) {
+      try {
+        await cartAPI.removeFromCart(productId);
+        fetchCart();
+      } catch (error) {
+        console.error('Error removing product:', error);
+      }
+    }
+  };
+
+  // Handle payment receipt file selection
+  const handleReceiptChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPaymentReceipt(file);
+      setReceiptPreview(URL.createObjectURL(file));
+    }
+  };
+
+  // Remove receipt
+  const removeReceipt = () => {
+    setPaymentReceipt(null);
+    if (receiptPreview) {
+      URL.revokeObjectURL(receiptPreview);
+    }
+    setReceiptPreview(null);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setShippingAddress(prev => ({ ...prev, [name]: value }));
@@ -157,7 +205,17 @@ const Checkout = () => {
         productId,
       }));
 
-      const response = await orderAPI.checkout(addressString, couponsData);
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('shippingAddress', addressString);
+      formData.append('coupons', JSON.stringify(couponsData));
+      formData.append('paymentMethod', paymentMethod);
+      
+      if (paymentReceipt) {
+        formData.append('paymentReceipt', paymentReceipt);
+      }
+
+      const response = await orderAPI.checkout(formData);
       setOrderId(response.data.order._id);
       setOrderComplete(true);
     } catch (error) {
@@ -326,14 +384,112 @@ const Checkout = () => {
               </div>
 
               <div className="bg-card rounded-lg border border-border p-4">
-                <h2 className="text-lg font-semibold mb-3" style={{ fontFamily: 'var(--font-serif)' }}>Payment</h2>
-                <div className="flex items-center gap-2 p-3 border border-accent rounded-lg bg-accent/5">
-                  <CreditCard size={18} className="text-accent" />
-                  <div>
-                    <p className="font-medium text-sm">Cash on Delivery</p>
-                    <p className="text-xs text-muted-foreground">Pay when you receive</p>
+                <h2 className="text-lg font-semibold mb-3" style={{ fontFamily: 'var(--font-serif)' }}>Payment Method</h2>
+                
+                {/* EasyPaisa */}
+                <label 
+                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer mb-2 transition-all ${
+                    paymentMethod === 'easy paisa' ? 'border-accent bg-accent/5' : 'border-border hover:border-gray-300'
+                  }`}
+                  onClick={() => setPaymentMethod('easy paisa')}
+                >
+                  <input 
+                    type="radio" 
+                    name="paymentMethod" 
+                    value="easy paisa"
+                    checked={paymentMethod === 'easy paisa'}
+                    onChange={() => setPaymentMethod('easy paisa')}
+                    className="hidden"
+                  />
+                  <Smartphone size={18} className="text-green-600" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">EasyPaisa</p>
+                    <p className="text-xs text-muted-foreground">Send payment to: 03422996302</p>
                   </div>
-                </div>
+                  {paymentMethod === 'easy paisa' && (
+                    <Check size={18} className="text-green-600" />
+                  )}
+                </label>
+                
+                {/* Bank Transfer */}
+                <label 
+                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer mb-2 transition-all ${
+                    paymentMethod === 'bank_transfer' ? 'border-accent bg-accent/5' : 'border-border hover:border-gray-300'
+                  }`}
+                  onClick={() => setPaymentMethod('bank_transfer')}
+                >
+                  <input 
+                    type="radio" 
+                    name="paymentMethod" 
+                    value="bank_transfer"
+                    checked={paymentMethod === 'bank_transfer'}
+                    onChange={() => setPaymentMethod('bank_transfer')}
+                    className="hidden"
+                  />
+                  <Building2 size={18} className="text-blue-600" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Bank Alfalah</p>
+                    <p className="text-xs text-muted-foreground">Account: 58595001864714</p>
+                  </div>
+                  {paymentMethod === 'bank_transfer' && (
+                    <Check size={18} className="text-green-600" />
+                  )}
+                </label>
+                
+                {/* Payment Receipt Upload - Always show for online payments */}
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800 mb-2 font-medium">
+                      Please send payment and upload receipt:
+                    </p>
+                    {paymentMethod === 'easy paisa' && (
+                      <p className="text-xs text-yellow-700 mb-3">
+                        Send PKR {calculateFinalTotal().toFixed(2)} to: 03422996302 (Syeda Dua-e-Zahra)
+                      </p>
+                    )}
+                    {paymentMethod === 'bank_transfer' && (
+                      <div className="text-xs text-yellow-700 mb-3 space-y-1">
+                        <p>Bank: Bank Alfalah</p>
+                        <p>Account: 58595001864714</p>
+                        <p>IBAN: PK57ALFH5859005001864714</p>
+                        <p>Title: SYED DANIYAL ALI</p>
+                        <p className="font-medium">Amount: PKR {calculateFinalTotal().toFixed(2)}</p>
+                      </div>
+                    )}
+                    
+                    <div className="mt-2">
+                      <label className="block text-xs font-medium mb-1">Upload Payment Receipt</label>
+                      <div className="flex items-center gap-2">
+                        <label className="flex items-center gap-2 px-3 py-2 bg-white border border-yellow-300 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors">
+                          <Upload size={16} className="text-yellow-600" />
+                          <span className="text-xs">Choose File</span>
+                          <input 
+                            type="file" 
+                            accept="image/*,.pdf"
+                            onChange={handleReceiptChange}
+                            className="hidden"
+                          />
+                        </label>
+                        {receiptPreview && (
+                          <button
+                            type="button"
+                            onClick={removeReceipt}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                      {receiptPreview && (
+                        <div className="mt-2">
+                          <img 
+                            src={receiptPreview} 
+                            alt="Receipt Preview" 
+                            className="h-20 w-20 object-cover rounded border"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
               </div>
 
               {/* Product Coupons Section */}
@@ -363,13 +519,21 @@ const Checkout = () => {
                           />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">{item.product?.name}</p>
-                            <p className="text-xs text-muted-foreground">Qty: {item.quantity} × ${item.product?.price}</p>
+                            <p className="text-xs text-muted-foreground">Qty: {item.quantity} × Rs.{item.product?.price}</p>
                           </div>
+                          
+                          <button
+                            onClick={() => removeProductFromCart(productId)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                            title="Remove product"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                           
                           {hasCoupon ? (
                             <div className="flex items-center gap-2">
                               <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                                {hasCoupon.code} (-${hasCoupon.discount?.toFixed(2)})
+                                {hasCoupon.code} (-Rs.{hasCoupon.discount?.toFixed(2)})
                               </span>
                               <button
                                 type="button"
@@ -405,7 +569,7 @@ const Checkout = () => {
                         {hasCoupon && (
                           <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
                             <Check size={12} />
-                            Coupon applied! You save ${hasCoupon.discount?.toFixed(2)}
+                            Coupon applied! You save Rs.{hasCoupon.discount?.toFixed(2)}
                           </div>
                         )}
                       </div>
@@ -423,7 +587,7 @@ const Checkout = () => {
                 {/* Items */}
                 <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
                   {cart.products.map((item) => (
-                    <div key={item.product?._id} className="flex gap-2 items-center">
+                    <div key={item.product?._id} className="flex gap-2 items-center group">
                       <img
                         src={getImageUrl(item.product)}
                         alt={item.product?.name}
@@ -433,14 +597,21 @@ const Checkout = () => {
                         <p className="font-medium text-xs truncate">{item.product?.name}</p>
                         <p className="text-muted-foreground text-xs">Qty: {item.quantity}</p>
                       </div>
+                      <button
+                        onClick={() => removeProductFromCart(item.product?._id)}
+                        className="text-red-500 hover:text-red-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove product"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                       <div className="text-right">
                         {getItemDiscount(item) > 0 ? (
                           <>
-                            <p className="font-medium text-xs line-through text-gray-400">${((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
-                            <p className="font-medium text-xs text-green-600">${getItemFinalPrice(item).toFixed(2)}</p>
+                            <p className="font-medium text-xs line-through text-gray-400">Rs.{((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
+                            <p className="font-medium text-xs text-green-600">Rs.{getItemFinalPrice(item).toFixed(2)}</p>
                           </>
                         ) : (
-                          <p className="font-medium text-sm">${((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
+                          <p className="font-medium text-sm">Rs.{((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
                         )}
                       </div>
                     </div>
@@ -450,34 +621,36 @@ const Checkout = () => {
                 <div className="space-y-2 border-t border-border pt-3">
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span>Rs.{calculateTotal().toFixed(2)}</span>
                   </div>
                   {calculateDiscount() > 0 && (
                     <div className="flex justify-between text-xs text-green-600">
                       <span>Discount</span>
-                      <span>-${calculateDiscount().toFixed(2)}</span>
+                      <span>-Rs.{calculateDiscount().toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>Free</span>
+                    <span>{calculateShipping() === 0 ? 'Free' : `Rs.${calculateShipping().toFixed(2)}`}</span>
                   </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>${(calculateFinalTotal() * 0.1).toFixed(2)}</span>
-                  </div>
+                  {calculateShipping() === 0 && (
+                    <div className="text-xs text-green-600">
+                      🎉 Free shipping on orders above Rs.2,500!
+                    </div>
+                  )}
+                
                   <div className="flex justify-between font-bold text-sm pt-2 border-t border-border">
                     <span>Total</span>
-                    <span>${(calculateFinalTotal() * 1.1).toFixed(2)}</span>
+                    <span>Rs.{(calculateGrandTotal() * 1.1).toFixed(2)}</span>
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={processing}
+                  disabled={processing || !paymentReceipt}
                   className="w-full mt-4 px-4 py-2 bg-accent text-accent-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {processing ? 'Processing...' : 'Place Order'}
+                  {processing ? 'Processing...' : !paymentReceipt ? 'Upload Payment Receipt to Proceed' : 'Place Order'}
                 </button>
               </div>
             </div>

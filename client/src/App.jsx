@@ -105,6 +105,20 @@ function App() {
             <Route path="profile" element={<Profile />} />
           </Route>
 
+          {/* User Profile Route - Direct access */}
+          <Route
+            path="/user"
+            element={
+              <UserRoute>
+                <Shop />
+              </UserRoute>
+            }
+          >
+            <Route index element={<Profile />} />
+            <Route path="orders" element={<UserDashboard />} />
+            <Route path="wishlist" element={<Wishlist />} />
+          </Route>
+
           {/* Catch all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

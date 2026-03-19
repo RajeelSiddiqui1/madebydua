@@ -29,8 +29,9 @@ const Profile = () => {
   }, [isAuthenticated]);
 
   const getImageUrl = (item) => {
+    if (!item) return 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=100&h=100&fit=crop';
     if (item.image && item.image.startsWith('http')) return item.image;
-    return item.image ? `http://localhost:5007/uploads/product/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=100&h=100&fit=crop';
+    return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=100&h=100&fit=crop';
   };
 
   const getStatusColor = (status) => {
@@ -153,8 +154,25 @@ const Profile = () => {
                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
+                        {order.paymentStatus && (
+                          <div className="mt-1">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                              order.paymentStatus === 'verified' ? 'bg-green-100 text-green-700' :
+                              order.paymentStatus === 'rejected' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              Payment: {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
+                    {order.paymentStatus === 'rejected' && order.paymentRejectionReason && (
+                      <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                        <p className="font-medium">Payment Rejected</p>
+                        <p>Reason: {order.paymentRejectionReason}</p>
+                      </div>
+                    )}
                     
                     <div className="border-t border-border pt-2 mb-2">
                       <p className="text-xs text-muted-foreground mb-2">Items:</p>
@@ -169,7 +187,7 @@ const Profile = () => {
                             <div>
                               <p className="font-medium text-xs">{item.product?.name}</p>
                               <p className="text-muted-foreground text-xs">x{item.quantity}</p>
-                              <p className="font-medium text-xs">${((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
+                              <p className="font-medium text-xs">Rs.{((item.product?.price || 0) * item.quantity).toFixed(2)}</p>
                             </div>
                           </div>
                         ))}
@@ -183,7 +201,7 @@ const Profile = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">Total</p>
-                        <p className="font-bold text-sm">${order.totalAmount?.toFixed(2)}</p>
+                        <p className="font-bold text-sm">Rs.{order.totalAmount?.toFixed(2)}</p>
                       </div>
                     </div>
                   </div>

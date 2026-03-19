@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Truck, Shield, RotateCcw, Heart } from 'lucide-react';
+import { ChevronRight, Truck, Shield, RotateCcw, Heart, Image, Building2 } from 'lucide-react';
 import { productAPI, categoryAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
@@ -88,6 +88,21 @@ const Home = () => {
       return item.image;
     }
     return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
+  };
+
+  const getImageCount = (item) => {
+    if (item.images && Array.isArray(item.images)) {
+      return item.images.length;
+    }
+    return item.image ? 1 : 0;
+  };
+
+  // Calculate discount percentage
+  const getDiscountPercent = (item) => {
+    if (item.comparePrice && item.price && item.comparePrice > item.price) {
+      return Math.round(((item.comparePrice - item.price) / item.comparePrice) * 100);
+    }
+    return 0;
   };
 
   const getCategoryImage = (item) => {
@@ -191,15 +206,28 @@ const Home = () => {
                       NEW
                     </span>
                   )}
+                  {/* Discount Badge */}
+                  {getDiscountPercent(product) > 0 && (
+                    <span className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                      -{getDiscountPercent(product)}% OFF
+                    </span>
+                  )}
+                  {/* Multiple Images Indicator */}
+                  {getImageCount(product) > 1 && (
+                    <span className="absolute bottom-3 left-3 bg-background/80 text-foreground text-[10px] font-medium px-2 py-0.5 rounded flex items-center gap-1">
+                      <Image size={10} />
+                      {getImageCount(product)}
+                    </span>
+                  )}
                   <button className="absolute top-3 right-3 p-1.5 rounded-full bg-background/80 hover:bg-background text-foreground transition-colors opacity-0 group-hover:opacity-100" onClick={(e) => { e.preventDefault(); }}>
                     <Heart size={14} />
                   </button>
                 </div>
                 <h3 className="text-sm font-medium truncate">{product.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm font-semibold">${product.price}</span>
-                  {product.oldPrice && (
-                    <span className="text-xs text-muted-foreground line-through">${product.oldPrice}</span>
+                  <span className="text-sm font-semibold">Rs.{product.price}</span>
+                  {product.comparePrice && product.comparePrice > product.price && (
+                    <span className="text-xs text-muted-foreground line-through">Rs.{product.comparePrice}</span>
                   )}
                 </div>
               </Link>
@@ -219,12 +247,30 @@ const Home = () => {
             <Link key={product._id || idx} to={`/product/${product._id || product.name}`} className="group block">
               <div className="relative rounded-xl overflow-hidden aspect-[4/3] sm:aspect-square bg-muted mb-3">
                 <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                {/* Discount Badge */}
+                {getDiscountPercent(product) > 0 && (
+                  <span className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                    -{getDiscountPercent(product)}% OFF
+                  </span>
+                )}
+                {/* Multiple Images Indicator */}
+                {getImageCount(product) > 1 && (
+                  <span className="absolute bottom-3 left-3 bg-background/80 text-foreground text-[10px] font-medium px-2 py-0.5 rounded flex items-center gap-1">
+                    <Image size={10} />
+                    {getImageCount(product)}
+                  </span>
+                )}
                 <button className="absolute top-3 right-3 p-1.5 rounded-full bg-background/80 hover:bg-background text-foreground transition-colors opacity-0 group-hover:opacity-100" onClick={(e) => { e.preventDefault(); }}>
                   <Heart size={14} />
                 </button>
               </div>
               <h3 className="text-sm font-medium truncate">{product.name}</h3>
-              <span className="text-sm font-semibold mt-1 block">${product.price}</span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm font-semibold">Rs.{product.price}</span>
+                {product.comparePrice && product.comparePrice > product.price && (
+                  <span className="text-xs text-muted-foreground line-through">Rs.{product.comparePrice}</span>
+                )}
+              </div>
             </Link>
           ))}
         </div>
@@ -232,11 +278,11 @@ const Home = () => {
 
       {/* ── Trust Badges ── */}
       <section className="border-t border-border bg-card py-12">
-        <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+        <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-4 gap-8 text-center">
           <div className="flex flex-col items-center gap-2">
             <Truck size={28} className="text-accent" />
             <h4 className="font-semibold text-sm">Free Shipping</h4>
-            <p className="text-xs text-muted-foreground">On orders over $50</p>
+            <p className="text-xs text-muted-foreground">On orders over Rs.2500</p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <Shield size={28} className="text-accent" />
@@ -247,6 +293,11 @@ const Home = () => {
             <RotateCcw size={28} className="text-accent" />
             <h4 className="font-semibold text-sm">Easy Returns</h4>
             <p className="text-xs text-muted-foreground">30-day return policy</p>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Building2 size={28} className="text-accent" />
+            <h4 className="font-semibold text-sm">Bank Details</h4>
+            <p className="text-xs text-muted-foreground">Bank Alfalah: 58595001864714</p>
           </div>
         </div>
       </section>

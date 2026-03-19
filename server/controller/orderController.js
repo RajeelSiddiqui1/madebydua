@@ -2,12 +2,14 @@ import Order from "../models/orderModel.js";
 import Cart from "../models/cartModel.js";
 import Coupon from "../models/couponModel.js";
 import Product from "../models/productModel.js";
+import fs from "fs";
+import path from "path";
 
 // ➕ Checkout / Create Order
 export const checkout = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { shippingAddress, coupons } = req.body;
+    const { shippingAddress, coupons, paymentMethod } = req.body;
 
     const cart = await Cart.findOne({ user: userId }).populate("products.product");
     if (!cart || cart.products.length === 0) return res.status(400).json({ message: "Cart is empty" });
@@ -74,6 +76,12 @@ export const checkout = async (req, res) => {
 
     const finalAmount = totalAmount - discountAmount;
 
+    // Handle payment receipt upload
+    let paymentReceipt = "";
+    if (req.file) {
+      paymentReceipt = req.file.filename;
+    }
+
     const order = await Order.create({
       user: userId,
       products: cart.products.map((p) => ({ product: p.product._id, quantity: p.quantity })),
@@ -81,6 +89,10 @@ export const checkout = async (req, res) => {
       shippingAddress,
       coupons: usedCoupons,
       discountAmount: discountAmount,
+      paymentMethod: paymentMethod || "cash_on_delivery",
+      paymentReceipt: paymentReceipt,
+      // If payment method is not cash on delivery, mark as pending payment verification
+      paymentStatus: paymentMethod && paymentMethod !== "cash_on_delivery" ? "pending" : "pending",
     });
 
     // Clear cart
@@ -110,12 +122,20 @@ export const getUserOrders = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { status } = req.body; // pending, paid, shipped, delivered, cancelled
+    const { status, paymentStatus, paymentRejectionReason } = req.body;
 
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    order.status = status;
+    if (status) {
+      order.status = status;
+    }
+    if (paymentStatus) {
+      order.paymentStatus = paymentStatus;
+    }
+    if (paymentRejectionReason) {
+      order.paymentRejectionReason = paymentRejectionReason;
+    }
     await order.save();
 
     res.json({ message: "Order status updated", order });
@@ -134,6 +154,32 @@ export const getAllOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Delete payment receipt
+export const deletePaymentReceipt = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+    
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.paymentReceipt) {
+      const receiptPath = path.join(process.cwd(), "uploads/payments", order.paymentReceipt);
+      if (fs.existsSync(receiptPath)) {
+        fs.unlinkSync(receiptPath);
+      }
+      order.paymentReceipt = "";
+      order.paymentStatus = "pending";
+      await order.save();
+    }
+
+    res.json({ message: "Payment receipt deleted", order });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

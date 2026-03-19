@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Footer = () => {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <footer className="bg-primary text-primary-foreground py-12 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,11 +27,21 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Customer Service</h4>
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">My Account</h4>
             <ul className="space-y-2 text-sm opacity-70">
-              {['Contact Us', 'Shipping Info', 'Returns & Exchanges', 'FAQ'].map((l) => (
-                <li key={l}><Link to="#" className="hover:opacity-100 transition-opacity">{l}</Link></li>
-              ))}
+              {isAuthenticated ? (
+                <>
+                  <li><Link to="/user" className="hover:opacity-100 transition-opacity">My Profile</Link></li>
+                  <li><Link to="/user/orders" className="hover:opacity-100 transition-opacity">My Orders</Link></li>
+                  <li><Link to="/user/wishlist" className="hover:opacity-100 transition-opacity">Wishlist</Link></li>
+                  <li><Link to="/shop/cart" className="hover:opacity-100 transition-opacity">Cart</Link></li>
+                </>
+              ) : (
+                <>
+                  <li><Link to="/login" className="hover:opacity-100 transition-opacity">Login</Link></li>
+                  <li><Link to="/register" className="hover:opacity-100 transition-opacity">Register</Link></li>
+                </>
+              )}
             </ul>
           </div>
           <div>

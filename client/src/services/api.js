@@ -58,6 +58,7 @@ export const productAPI = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   delete: (id) => api.delete(`/product/${id}`),
+  deleteImage: (id, imageName) => api.delete(`/product/${id}/image`, { data: { imageName } }),
 };
 
 // Coupon APIs
@@ -94,16 +95,20 @@ export const cartAPI = {
 
 // Order APIs
 export const orderAPI = {
-  checkout: (shippingAddress, coupons) => api.post('/order/checkout', { shippingAddress, coupons }),
+  checkout: (formData) => api.post('/order/checkout', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
   getOrders: () => api.get('/order'),
   getAllOrders: () => api.get('/order/all'),
+  updateStatus: (orderId, data) => api.put(`/order/status/${orderId}`, data),
+  deleteReceipt: (orderId) => api.delete(`/order/receipt/${orderId}`),
 };
 
 // Admin APIs
 export const adminAPI = {
   getUsers: () => api.get('/auth/users'),
   getAllOrders: () => api.get('/order/all'),
-  updateOrderStatus: (orderId, status) => api.put(`/order/status/${orderId}`, { status }),
+  updateOrderStatus: (orderId, data) => api.put(`/order/status/${orderId}`, data),
 };
 
 export default api;

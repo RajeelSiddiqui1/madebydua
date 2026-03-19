@@ -106,6 +106,14 @@ const UserDashboard = () => {
     return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
   };
 
+  // Calculate discount percentage
+  const getDiscountPercent = (product) => {
+    if (product.comparePrice && product.price && product.comparePrice > product.price) {
+      return Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100);
+    }
+    return 0;
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[50vh]">
@@ -120,26 +128,7 @@ const UserDashboard = () => {
   return (
     <div className="bg-background">
       {/* Shop Header */}
-      <section className="bg-secondary/50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex justify-end mb-4">
-            <Link 
-              to="/shop/profile" 
-              className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              <User size={16} />
-              My Profile
-            </Link>
-          </div>
-          <h1 className="text-4xl lg:text-5xl font-light mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
-            Shop Our <span className="italic text-accent">Collection</span>
-          </h1>
-          <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Discover the perfect handcrafted addition for your home.
-            Each piece is unique and carefully designed with love.
-          </p>
-        </div>
-      </section>
+    
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 flex flex-col lg:flex-row gap-10">
         
@@ -196,19 +185,7 @@ const UserDashboard = () => {
 
         {/* Product Grid */}
         <div className="flex-1">
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
-            <p className="text-sm text-muted-foreground font-medium">
-              Showing <span className="text-foreground">{activeProducts.length}</span> results
-            </p>
-            <div className="flex gap-2">
-               <select className="bg-transparent border border-border text-sm py-1.5 px-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent">
-                 <option>Sort by: Featured</option>
-                 <option>Price: Low to High</option>
-                 <option>Price: High to Low</option>
-                 <option>Newest Arrivals</option>
-               </select>
-            </div>
-          </div>
+          
 
           {activeProducts.length === 0 ? (
             <div className="text-center py-24 bg-card rounded-2xl border border-border flex flex-col items-center">
@@ -244,9 +221,9 @@ const UserDashboard = () => {
                            Featured
                          </span>
                        )}
-                       {product.comparePrice && product.comparePrice > product.price && (
-                         <span className="bg-destructive text-destructive-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm">
-                           Sale
+                       {getDiscountPercent(product) > 0 && (
+                         <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm">
+                           {getDiscountPercent(product)}% OFF
                          </span>
                        )}
                     </div>
@@ -269,11 +246,11 @@ const UserDashboard = () => {
                     
                     <div className="mt-2 flex items-baseline gap-2">
                       <span className="text-base font-bold text-foreground">
-                        ${product.price}
+                        Rs.{product.price}
                       </span>
                       {product.comparePrice && product.comparePrice > product.price && (
                         <span className="text-xs text-muted-foreground line-through font-medium">
-                          ${product.comparePrice}
+                          Rs.{product.comparePrice}
                         </span>
                       )}
                     </div>

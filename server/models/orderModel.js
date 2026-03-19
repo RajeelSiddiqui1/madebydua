@@ -28,6 +28,20 @@ const orderSchema = new Schema(
     ],
 
     discountAmount: { type: Number, default: 0 },
+    
+    // Payment details
+    paymentMethod: { 
+      type: String, 
+      enum: ["cash_on_delivery", "easy paisa", "bank_transfer"],
+      default: "cash_on_delivery" 
+    },
+    paymentReceipt: { type: String, default: "" },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+      default: "pending"
+    },
+    paymentRejectionReason: { type: String, default: "" },
   },
   { timestamps: true }
 );

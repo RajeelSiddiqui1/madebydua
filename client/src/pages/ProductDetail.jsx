@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productAPI, categoryAPI, wishlistAPI, ratingAPI, cartAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Heart, ShoppingBag, Star } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Image, ChevronLeft, ChevronRight } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
-const ProductDetail = () => {
+const ProductDetailContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
@@ -21,6 +23,32 @@ const ProductDetail = () => {
   const [ratingComment, setRatingComment] = useState('');
   const [cartLoading, setCartLoading] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  // Get all product images for gallery
+  const getAllImages = () => {
+    if (!product) return [];
+    const images = [];
+    if (product.image) images.push(product.image);
+    if (product.images && Array.isArray(product.images)) {
+      product.images.forEach(img => {
+        if (!images.includes(img)) images.push(img);
+      });
+    }
+    return images;
+  };
+
+  const allImages = getAllImages();
+
+  // Calculate discount percentage
+  const getDiscountPercent = () => {
+    if (product && product.comparePrice && product.price && product.comparePrice > product.price) {
+      return Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100);
+    }
+    return 0;
+  };
+
+  const discountPercent = getDiscountPercent();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -197,17 +225,61 @@ const ProductDetail = () => {
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Product Image */}
+        {/* Product Image Gallery */}
         <div className="bg-gray-100 rounded-lg overflow-hidden relative">
-          {product.image ? (
-            <img
-              src={ `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${product.image}`}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+          {allImages.length > 0 ? (
+            <>
+              <div className="relative">
+                <img
+                  src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${allImages[selectedImageIndex]}`}
+                  alt={product.name}
+                  className="w-full h-96 object-contain"
+                />
+                {/* Navigation arrows for multiple images */}
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setSelectedImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1))}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onClick={() => setSelectedImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Thumbnail Gallery */}
+              {allImages.length > 1 && (
+                <div className="flex gap-2 mt-4 overflow-x-auto pb-2 px-2">
+                  {allImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImageIndex(idx)}
+                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        selectedImageIndex === idx ? 'border-blue-600 ring-2 ring-blue-200' : 'border-transparent hover:border-gray-300'
+                      }`}
+                    >
+                      <img
+                        src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${img}`}
+                        alt={`${product.name} ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-full h-96 flex items-center justify-center text-gray-400">
-              No Image Available
+              <div className="text-center">
+                <Image size={48} className="mx-auto mb-2" />
+                <p>No Image Available</p>
+              </div>
             </div>
           )}
           {/* Out of Stock Badge */}
@@ -219,7 +291,7 @@ const ProductDetail = () => {
         </div>
 
         {/* Product Info */}
-        <div>
+        <div className='px-2'>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {product.name}
           </h1>
@@ -248,21 +320,26 @@ const ProductDetail = () => {
 
           <div className="flex items-center gap-4 mb-6">
             <span className="text-3xl font-bold text-blue-600">
-              ${product.price}
+              Rs.{product.price}
             </span>
             {product.comparePrice && product.comparePrice > product.price && (
-              <span className="text-xl text-gray-400 line-through">
-                ${product.comparePrice}
-              </span>
+              <>
+                <span className="text-xl text-gray-400 line-through">
+                  Rs.{product.comparePrice}
+                </span>
+                <span className="text-sm font-bold bg-red-500 text-white px-2 py-1 rounded">
+                  {discountPercent}% OFF
+                </span>
+              </>
             )}
           </div>
 
           {product.shortDesc && (
-            <p className="text-gray-600 mb-4">{product.shortDesc}</p>
+            <p className="text-gray-600 mb-4 px-2 ">{product.shortDesc}</p>
           )}
 
           {product.longDesc && (
-            <div className="mb-6">
+            <div className="mb-6 px-2 ">
               <h3 className="text-lg font-semibold mb-2">Description</h3>
               <p className="text-gray-600 whitespace-pre-wrap">{product.longDesc}</p>
             </div>
@@ -423,7 +500,7 @@ const ProductDetail = () => {
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-gray-900">{relProduct.name}</h3>
-                  <p className="text-blue-600 font-bold mt-1">${relProduct.price}</p>
+                  <p className="text-blue-600 font-bold mt-1">Rs.{relProduct.price}</p>
                 </div>
               </Link>
             ))}
@@ -434,4 +511,16 @@ const ProductDetail = () => {
   );
 };
 
-export default ProductDetail;
+const ProductDetailWithLayout = () => {
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen">
+        <ProductDetailContent />
+      </main>
+      <Footer />
+    </>
+  );
+};
+
+export default ProductDetailWithLayout;

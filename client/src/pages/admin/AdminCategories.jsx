@@ -113,8 +113,8 @@ const AdminCategories = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <table className="min-w-full whitespace-nowrap">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -224,7 +224,7 @@ const AdminCategories = () => {
                 {editingCategory?.image && !imageFile && (
                   <div className="mb-2">
                     <img 
-                      src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_CATEGORY}/${category.image}`} 
+                      src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_CATEGORY}/${editingCategory.image}`} 
                       alt={editingCategory.name} 
                       className="h-20 w-20 object-cover rounded" 
                     />
@@ -291,7 +291,7 @@ const AdminCategories = () => {
                     <div className="flex-1">
                       <h3 className="font-semibold">{product.name}</h3>
                       <p className="text-sm text-gray-500">{product.shortDesc || 'No slug'}</p>
-                      <p className="text-blue-600 font-bold mt-1">${product.price}</p>
+                      <p className="text-blue-600 font-bold mt-1">Rs.{product.price}</p>
                       <span className={`text-xs ${product.active ? 'text-green-600' : 'text-red-600'}`}>
                         {product.active ? 'Active' : 'Inactive'}
                       </span>
