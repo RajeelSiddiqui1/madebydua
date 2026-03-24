@@ -28,7 +28,7 @@ services:
       - "5007:5007"
     environment:
       MONGODB_URI: mongodb://admin:123456@mongo:27017/madebydua_db?authSource=admin&serverSelectionTimeoutMS=30000&connectTimeoutMS=30000
-      JWT_SECRET: your_secret_here
+      JWT_SECRET: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
       PORT: 5007
     restart: unless-stopped
       
@@ -44,11 +44,6 @@ services:
     container_name: madebydua_frontend
     ports:
       - "5174:80"
-    environment:
-      VITE_BACKEND_URL: http://153.92.209.177:5007/api
-      VITE_BACKEND_URL_PRODUCT_IMAGE: http://153.92.209.177:5007/uploads/product
-      VITE_BACKEND_URL_PRODUCT_CATEGORY: http://153.92.209.177:5007/uploads/category
-      VITE_BACKEND_URL_PAYMENTS: http://153.92.209.177:5007/uploads/payments
     networks:
       - madebydua
     depends_on:

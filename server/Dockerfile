@@ -8,8 +8,6 @@ RUN npm install
 
 COPY . .
 
-# Copy .env file explicitly (needed for Docker build)
-COPY .env ./
 
 EXPOSE 5007
 
