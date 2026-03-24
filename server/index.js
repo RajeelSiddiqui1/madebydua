@@ -34,7 +34,7 @@ try {
 }
 
 app.use(cors({
-  origin: ["http://localhost:5173","http://153.92.209.177:5174"],
+  origin: ["http://localhost:5173","http://153.92.209.177:5174", "https://madebydua.com"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
