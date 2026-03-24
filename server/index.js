@@ -24,7 +24,14 @@ const __dirname = path.dirname(__filename)
 
 app.use(express.json())
 
-await dbConnect()
+// Connect to MongoDB and wait for it to be ready
+let dbConnected = false;
+try {
+  await dbConnect();
+  dbConnected = true;
+} catch (error) {
+  console.log("⚠️ Failed to connect to MongoDB on startup, will retry on requests...");
+}
 
 app.use(cors({
   origin: ["http://localhost:5173","http://153.92.209.177:5174"],
@@ -57,6 +64,16 @@ app.use("/api/wishlist", wishListRoute)
 app.use("/api/cart", cartRoute)
 app.use("/api/order", orderRoute)
 
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    status: "ok", 
+    dbConnected,
+    timestamp: new Date().toISOString() 
+  });
+});
+
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+    console.log(`✅ Server running on port ${PORT}`)
+    console.log(`   Health check: http://localhost:${PORT}/api/health`)
 })

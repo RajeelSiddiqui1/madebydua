@@ -27,9 +27,10 @@ services:
     ports:
       - "5007:5007"
     environment:
-      MONGODB_URI: mongodb://admin:123456@mongo:27017/madebydua_db?authSource=admin
+      MONGODB_URI: mongodb://admin:123456@mongo:27017/madebydua_db?authSource=admin&serverSelectionTimeoutMS=30000&connectTimeoutMS=30000
       JWT_SECRET: your_secret_here
       PORT: 5007
+    restart: unless-stopped
       
     networks:
       - madebydua
