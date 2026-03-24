@@ -5,8 +5,6 @@ services:
   mongo:
     image: mongo:6
     container_name: madebydua_mongo
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: madebydua_db
       MONGO_INITDB_ROOT_USERNAME: admin
