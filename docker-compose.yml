@@ -1,22 +1,64 @@
 version: "3.8"
 
 services:
-  backend: 
-   build: ./server
-   container_name: madebydua_backend
-   ports:
-     - 5007:5007
 
-   env_file:
-     - ./server/.env
+  mongo:
+    image: mongo:6
+    container_name: madebydua_mongo
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_DATABASE: madebydua_db
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    networks:
+      - madebydua
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "-u", "admin", "-p", "123456", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
-  frontend: 
-   build: ./client
-   container_name: madebydua_frontend
-   ports:
-     - 5180:80
+  backend:
+    build:
+      context: ./server
+    container_name: madebydua_backend
+    ports:
+      - "5007:5007"
+    environment:
+      JWT_SECRET: your_secret_here
+      PORT: 5007
+      MONGODB_URI: mongodb://admin:123456@mongo:27018/madebydua_db?authSource=admin
+    networks:
+      - madebydua
+    depends_on:
+      mongo:
+        condition: service_healthy
 
-   env_file:
-     - ./server/.env  
+  frontend:
+    build:
+      context: ./client
+    container_name: madebydua_frontend
+    ports:
+      - "5174:80"
+    environment:
+      VITE_BACKEND_URL: http://153.92.209.177:5007/api
+      VITE_BACKEND_URL_PRODUCT_IMAGE: http://153.92.209.177:5007/uploads/product
+      VITE_BACKEND_URL_PRODUCT_CATEGORY: http://153.92.209.177:5007/uploads/category
+      VITE_BACKEND_URL_PAYMENTS: http://153.92.209.177:5007/uploads/payments
+    networks:
+      - madebydua
+    depends_on:
+      backend:
+        condition: service_started   
 
-  
+networks:
+  madebydua:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
