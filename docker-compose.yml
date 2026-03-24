@@ -6,7 +6,7 @@ services:
     image: mongo:6
     container_name: madebydua_mongo
     ports:
-      - "27018:27017"
+      - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: madebydua_db
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -29,7 +29,7 @@ services:
     ports:
       - "5007:5007"
     environment:
-      MONGODB_URI: mongodb://admin:123456@mongo:27018/madebydua_db?authSource=admin
+      MONGODB_URI: mongodb://admin:123456@mongo:27017/madebydua_db?authSource=admin
       JWT_SECRET: your_secret_here
       PORT: 5007
       
