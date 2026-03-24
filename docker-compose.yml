@@ -29,9 +29,10 @@ services:
     ports:
       - "5007:5007"
     environment:
+      MONGODB_URI: mongodb://admin:123456@mongo:27018/madebydua_db?authSource=admin
       JWT_SECRET: your_secret_here
       PORT: 5007
-      MONGODB_URI: mongodb://admin:123456@mongo:27018/madebydua_db?authSource=admin
+      
     networks:
       - madebydua
     depends_on:
