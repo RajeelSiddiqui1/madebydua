@@ -34,15 +34,19 @@ try {
 }
 
 app.use(cors({
-  origin: ["http://localhost:5173","http://153.92.209.177:5174", "https://madebydua.com"],
+  origin: ["http://localhost:5173","http://153.92.209.177:5174", "https://madebydua.com", "https://www.madebydua.com"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Explicit CORS headers for additional assurance
+// Dynamic CORS headers based on request origin
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://153.92.209.177:5174');
+  const allowedOrigins = ["http://localhost:5173", "http://153.92.209.177:5174", "https://madebydua.com", "https://www.madebydua.com"];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
