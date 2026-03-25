@@ -10,6 +10,7 @@ const Checkout = () => {
   const [processing, setProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [error, setError] = useState('');
   const [shippingAddress, setShippingAddress] = useState({
     street: '',
     city: '',
@@ -194,6 +195,7 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setProcessing(true);
     
     try {
@@ -220,7 +222,7 @@ const Checkout = () => {
       setOrderComplete(true);
     } catch (error) {
       console.error('Error processing order:', error);
-      alert('Failed to process order. Please try again.');
+      setError(error.response?.data?.message || 'Failed to process order. Please try again.');
     } finally {
       setProcessing(false);
     }
@@ -444,9 +446,17 @@ const Checkout = () => {
                       Please send payment and upload receipt:
                     </p>
                     {paymentMethod === 'easy paisa' && (
-                      <p className="text-xs text-yellow-700 mb-3">
-                        Send PKR to: 03422996302 (Syeda Dua-e-Zahra)
-                      </p>
+                      <div className="space-y-2 mb-3">
+                        <p className="text-xs text-yellow-700">
+                          Send PKR to: 03422996302 (Syeda Dua-e-Zahra)
+                        </p>
+                        <p className="text-xs text-yellow-700">
+                          IBAN: PK57ALFH5859005001864714
+                        </p>
+                        <p className="text-xs text-yellow-700">
+                          Syeda Dua-e-Zahra
+                        </p>
+                      </div>
                     )}
                     {paymentMethod === 'bank_transfer' && (
                       <div className="text-xs text-yellow-700 mb-3 space-y-1">
@@ -654,6 +664,11 @@ const Checkout = () => {
                 >
                   {processing ? 'Processing...' : !paymentReceipt ? 'Upload Payment Receipt to Proceed' : 'Place Order'}
                 </button>
+                {error && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-600 text-sm text-center">{error}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
