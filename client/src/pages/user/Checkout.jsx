@@ -448,7 +448,7 @@ const Checkout = () => {
                     {paymentMethod === 'easy paisa' && (
                       <div className="space-y-2 mb-3">
                         <p className="text-xs text-yellow-700">
-                          Send PKR to: 03422996302 (Syeda Dua-e-Zahra)
+                          Send PKR to: 03422996302 
                         </p>
                         <p className="text-xs text-yellow-700">
                           IBAN: PK57ALFH5859005001864714
