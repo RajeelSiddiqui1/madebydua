@@ -405,6 +405,7 @@ const Checkout = () => {
                   <div className="flex-1">
                     <p className="font-medium text-sm">EasyPaisa</p>
                     <p className="text-xs text-muted-foreground">Send payment to: 03422996302</p>
+                    <p className="text-xs text-muted-foreground">IBAN: PK02TMFB0000000063987806</p>
                   </div>
                   {paymentMethod === 'easy paisa' && (
                     <Check size={18} className="text-green-600" />
@@ -430,6 +431,7 @@ const Checkout = () => {
                   <div className="flex-1">
                     <p className="font-medium text-sm">Bank Alfalah</p>
                     <p className="text-xs text-muted-foreground">Account: 58595001864714</p>
+                    <p className="text-xs text-muted-foreground"></p>
                   </div>
                   {paymentMethod === 'bank_transfer' && (
                     <Check size={18} className="text-green-600" />
