@@ -443,7 +443,7 @@ const Checkout = () => {
                     </p>
                     {paymentMethod === 'easy paisa' && (
                       <p className="text-xs text-yellow-700 mb-3">
-                        Send PKR {calculateFinalTotal().toFixed(2)} to: 03422996302 (Syeda Dua-e-Zahra)
+                        Send PKR to: 03422996302 (Syeda Dua-e-Zahra)
                       </p>
                     )}
                     {paymentMethod === 'bank_transfer' && (
@@ -452,7 +452,7 @@ const Checkout = () => {
                         <p>Account: 58595001864714</p>
                         <p>IBAN: PK57ALFH5859005001864714</p>
                         <p>Title: SYED DANIYAL ALI</p>
-                        <p className="font-medium">Amount: PKR {calculateFinalTotal().toFixed(2)}</p>
+                     
                       </div>
                     )}
                     

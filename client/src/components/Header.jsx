@@ -237,14 +237,7 @@ const Header = ({
               <Store size={20} />
               <span>Shop</span>
             </Link>
-            <Link 
-              to="/shop" 
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Grid size={20} />
-              <span>Collection</span>
-            </Link>
+          
             {isAuthenticated ? (
               <>
                 <Link 
@@ -293,10 +286,7 @@ const Header = ({
             <Store size={20} />
             <span className="text-xs">Shop</span>
           </Link>
-          <Link to="/shop" className="flex flex-col items-center gap-1 p-2 hover:text-accent transition-colors">
-            <Grid size={20} />
-            <span className="text-xs">Collection</span>
-          </Link>
+          
           {isAuthenticated ? (
             <>
               <Link to="/user" className="flex flex-col items-center gap-1 p-2 hover:text-accent transition-colors">

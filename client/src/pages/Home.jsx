@@ -160,7 +160,7 @@ const Home = () => {
           </p>
           <div>
             <Link
-              to="/page/user"
+              to="/shop"
               className="inline-flex items-center gap-2 px-8 py-3 bg-accent text-accent-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Explore Collection
@@ -276,32 +276,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Trust Badges ── */}
-      <section className="border-t border-border bg-card py-12">
-        <div className="max-w-5xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-4 gap-8 text-center">
-          <div className="flex flex-col items-center gap-2">
-            <Truck size={28} className="text-accent" />
-            <h4 className="font-semibold text-sm">Free Shipping</h4>
-            <p className="text-xs text-muted-foreground">On orders over Rs.2500</p>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <Shield size={28} className="text-accent" />
-            <h4 className="font-semibold text-sm">Secure Payment</h4>
-            <p className="text-xs text-muted-foreground">100% secure checkout</p>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <RotateCcw size={28} className="text-accent" />
-            <h4 className="font-semibold text-sm">Easy Returns</h4>
-            <p className="text-xs text-muted-foreground">30-day return policy</p>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <Building2 size={28} className="text-accent" />
-            <h4 className="font-semibold text-sm">Bank Details</h4>
-            <p className="text-xs text-muted-foreground">Bank Alfalah: 58595001864714</p>
-          </div>
-        </div>
-      </section>
-
+      
       <Footer />
     </div>
   );
