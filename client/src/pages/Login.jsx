@@ -166,11 +166,7 @@ const Login = () => {
             </div> */}
 
             {/* Demo Credentials */}
-            <div className="mt-6 p-4 rounded-lg bg-muted text-sm">
-              <p className="font-semibold mb-1">Demo Credentials:</p>
-              <p className="text-muted-foreground"><strong>Admin:</strong> admin@madebydua.com / admin123</p>
-              <p className="text-muted-foreground"><strong>Customer:</strong> john@example.com / password123</p>
-            </div>
+           
 
             <p className="text-center text-sm text-muted-foreground mt-6">
               Don't have an account?{' '}

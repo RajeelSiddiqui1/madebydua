@@ -224,10 +224,7 @@ const Register = () => {
               </button>
             </div> */}
 
-            <p className="mt-4 text-center text-xs text-gray-500">
-              Admin accounts can be created via Postman/API
-            </p>
-
+       
             <p className="text-center text-sm text-muted-foreground mt-5">
               Already have an account?{' '}
               <Link to="/login" className="text-accent font-medium hover:underline">Sign In</Link>
