@@ -9,34 +9,6 @@ import { wishlistAPI } from '../services/api';
 
 /* ── Static Fallback Data ─────────────────────────────────────────── */
 
-const staticCategories = [
-  { name: 'Clearance Sale', image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop' },
-  { name: 'Candles', image: 'https://images.unsplash.com/photo-1602607912066-85af05755121?w=400&h=400&fit=crop' },
-  { name: 'Gifting', image: 'https://images.unsplash.com/photo-1513519245088-0e12902e35a6?w=400&h=400&fit=crop' },
-  { name: 'Decoration Sets', image: 'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?w=400&h=400&fit=crop' },
-];
-
-const staticFeaturedProducts = [
-  { name: 'Classic Cotton T-Shirt', price: 29.99, oldPrice: 39.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop', isNew: true },
-  { name: 'Leather Wallet', price: 49.99, oldPrice: 59.99, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop', isNew: true },
-  { name: 'Minimalist Watch', price: 89.99, oldPrice: 119.99, image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=400&fit=crop', isNew: true },
-  { name: 'Denim Jacket', price: 79.99, oldPrice: 99.99, image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop', isNew: true },
-  { name: 'Canvas Backpack', price: 59.99, oldPrice: 75.99, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop', isNew: false },
-  { name: 'Sunglasses', price: 34.99, oldPrice: 44.99, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop', isNew: false },
-  { name: 'Ceramic Vase', price: 44.99, oldPrice: 54.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop', isNew: false },
-  { name: 'Wireless Earbuds', price: 129.99, oldPrice: 159.99, image: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop', isNew: false },
-];
-
-const staticNewArrivals = [
-  { name: 'Wireless Earbuds', price: 129.99, image: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop' },
-  { name: 'Ceramic Vase', price: 44.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop' },
-  { name: 'Sunglasses', price: 34.99, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop' },
-  { name: 'Canvas Backpack', price: 59.99, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop' },
-  { name: 'Denim Jacket', price: 79.99, image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop' },
-  { name: 'Minimalist Watch', price: 89.99, image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=400&fit=crop' },
-  { name: 'Leather Wallet', price: 49.99, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop' },
-  { name: 'Classic Cotton T-Shirt', price: 29.99, image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop' },
-];
 
 /* ── Component ────────────────────────────────────── */
 
