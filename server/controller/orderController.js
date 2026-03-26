@@ -4,6 +4,8 @@ import Coupon from "../models/couponModel.js";
 import Product from "../models/productModel.js";
 import fs from "fs";
 import path from "path";
+import { sendOrderNotification, sendStatusUpdateNotification } from "../utils/email.js";
+import User from "../models/userModel.js";
 
 // ➕ Checkout / Create Order
 export const checkout = async (req, res) => {
@@ -95,6 +97,17 @@ export const checkout = async (req, res) => {
       paymentStatus: paymentMethod && paymentMethod !== "cash_on_delivery" ? "pending" : "pending",
     });
 
+    // Send email notifications (non-blocking)
+    const orderForEmail = {
+      ...order.toObject(),
+      products: cart.products.map(p => ({
+        product: p.product,
+        quantity: p.quantity
+      }))
+    };
+    
+    sendOrderNotification(orderForEmail, req.user);
+
     // Clear cart
     cart.products = [];
     await cart.save();
@@ -166,6 +179,12 @@ export const updateOrderStatus = async (req, res) => {
       order.paymentRejectionReason = paymentRejectionReason;
     }
     await order.save();
+
+    // Send status update notification
+    const populatedOrder = await Order.findById(orderId).populate("user", "firstName lastName email");
+    if (populatedOrder && populatedOrder.user) {
+      sendStatusUpdateNotification(populatedOrder, populatedOrder.user);
+    }
 
     res.json({ message: "Order status updated", order });
   } catch (err) {

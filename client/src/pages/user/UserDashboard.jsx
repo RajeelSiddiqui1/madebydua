@@ -46,6 +46,11 @@ const UserDashboard = () => {
   };
 
   useEffect(() => {
+    const category = searchParams.get('category') || '';
+    setSelectedCategory(category);
+  }, [searchParams]);
+
+  useEffect(() => {
     fetchProducts();
     fetchCategories();
     if (isAuthenticated) {

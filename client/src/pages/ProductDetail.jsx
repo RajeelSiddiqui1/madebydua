@@ -124,26 +124,6 @@ const ProductDetailContent = () => {
     fetchRatings();
   }, [product, user]);
 
-  const handleWishlistToggle = async () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    setWishlistLoading(true);
-    try {
-      if (isInWishlist) {
-        await wishlistAPI.remove(product._id);
-        setIsInWishlist(false);
-      } else {
-        await wishlistAPI.add(product._id);
-        setIsInWishlist(true);
-      }
-    } catch (error) {
-      console.error('Error toggling wishlist:', error);
-    } finally {
-      setWishlistLoading(false);
-    }
-  };
 
   const handleRatingSubmit = async (rating) => {
     if (!isAuthenticated) {
@@ -299,22 +279,9 @@ const ProductDetailContent = () => {
             <p className="text-sm text-gray-500 mb-2">Category: {categoryName}</p>
           )}
 
-          {/* Rating Display */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  size={18}
-                  className={` ${star <= Math.round(averageRating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
-                    }`}
-                />
-              ))}
-            </div>
-            <span className="text-sm text-gray-500">
-              {averageRating.toFixed(1)} ({ratings.length} {ratings.length === 1 ? 'review' : 'reviews'})
+            <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+              Handcrafted with Love
             </span>
           </div>
 
@@ -352,122 +319,25 @@ const ProductDetailContent = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={cartLoading}
-                  className={`bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 ${addedToCart ? 'bg-green-600' : ''}`}
+                  className={`bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 w-full md:w-auto ${addedToCart ? 'bg-green-600' : ''}`}
                 >
                   <ShoppingBag size={20} />
                   {addedToCart ? 'Added!' : cartLoading ? 'Adding...' : 'Add to Cart'}
-                </button>
-                <button
-                  onClick={handleWishlistToggle}
-                  disabled={wishlistLoading}
-                  className={`p-3 rounded-lg border-2 transition-colors flex items-center gap-2 ${isInWishlist
-                      ? 'border-red-500 text-red-500 bg-red-50'
-                      : 'border-gray-300 hover:border-red-500 hover:text-red-500'
-                    }`}
-                >
-                  <Heart size={20} className={isInWishlist ? 'fill-current' : ''} />
-                  {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
                 </button>
               </>
             ) : (
               <div className="flex gap-4">
                 <button
                   onClick={() => navigate('/login')}
-                  className="bg-gray-300 text-gray-700 px-8 py-3 rounded-lg cursor-not-allowed"
+                  className="bg-gray-300 text-gray-700 px-8 py-3 rounded-lg cursor-not-allowed w-full md:w-auto"
                   disabled
                 >
                   Login to Add to Cart
-                </button>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="p-3 rounded-lg border-2 border-gray-300 text-gray-500"
-                >
-                  <Heart size={20} />
                 </button>
               </div>
             )}
           </div>
 
-          {/* Rating Section */}
-          {isAuthenticated && (
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-semibold mb-4">Rate this product</h3>
-              <div className="flex items-center gap-2 mb-4">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRatingSubmit(star)}
-                    disabled={ratingLoading}
-                    className="focus:outline-none"
-                  >
-                    <Star
-                      size={32}
-                      className={` ${star <= userRating
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300 hover:text-yellow-200'
-                        } transition-colors`}
-                    />
-                  </button>
-                ))}
-                {userRating > 0 && (
-                  <span className="ml-2 text-sm text-gray-500">
-                    You rated this {userRating} star{userRating > 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
-              <div className="mt-4">
-                <textarea
-                  value={ratingComment}
-                  onChange={(e) => setRatingComment(e.target.value)}
-                  placeholder="Write a comment (optional)"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                />
-                {userRating > 0 && (
-                  <button
-                    onClick={() => handleRatingSubmit(userRating)}
-                    disabled={ratingLoading}
-                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                  >
-                    {ratingLoading ? 'Submitting...' : 'Update Review'}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Reviews List */}
-          {ratings.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Customer Reviews</h3>
-              <div className="space-y-4">
-                {ratings.map((rating, index) => (
-                  <div key={index} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            size={16}
-                            className={` ${star <= rating.rating
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                              }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm font-medium">
-                        {rating.user?.name || rating.user?.email || 'Anonymous'}
-                      </span>
-                    </div>
-                    {rating.comment && (
-                      <p className="text-gray-600 text-sm">{rating.comment}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

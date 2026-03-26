@@ -1,10 +1,10 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, LogOut, User, ChevronRight, Home, Grid, Store, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Search, ShoppingBag, LogOut, User, ChevronRight, Home, Grid, Store, Menu, X, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { categoryAPI } from '../services/api';
 
 const Header = ({ 
-  wishlistCount = 0, 
   cartCount = 0,
   navLinks = [
     { name: 'Home', path: '/' },
@@ -18,6 +18,21 @@ const Header = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
+  const [mobileShopOpen, setMobileShopOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryAPI.getAll();
+        setCategories(response.data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Generate breadcrumb from current path
   const getBreadcrumb = () => {
@@ -43,7 +58,7 @@ const Header = ({
   };
 
   const handleNavClick = (e, path) => {
-    if (!isAuthenticated && (path === '/shop' || path === '/wishlist')) {
+    if (!isAuthenticated && path === '/shop') {
       e.preventDefault();
       navigate('/login');
     }
@@ -60,7 +75,7 @@ const Header = ({
       <div className="lg:hidden max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
         {/* Logo - Left */}
         <Link to="/" className="text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-          NewDua
+          Handmade By Dua
         </Link>
         
         {/* Breadcrumb - Right */}
@@ -113,34 +128,65 @@ const Header = ({
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold tracking-tight shrink-0 hidden lg:block" style={{ fontFamily: 'var(--font-serif)' }}>
-            NewDua
+            Handmade By Dua
           </Link>
 
           {/* Search */}
-          {showSearch && (
-            <div className="hidden md:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search for handcrafted pieces..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder:text-muted-foreground transition-all"
-                />
-              </div>
-            </div>
-          )}
-
+     
           {/* Nav Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
+          <nav className="hidden lg:flex items-center gap-8 text-sm font-medium ml-8">
             {navLinks.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                onClick={(e) => handleNavClick(e, item.path)}
-                className="hover:text-accent transition-colors"
+              <div 
+                key={item.name} 
+                className="relative group h-16 flex items-center"
+                onMouseEnter={() => item.name === 'Shop' && setShopDropdownOpen(true)}
+                onMouseLeave={() => item.name === 'Shop' && setShopDropdownOpen(false)}
               >
-                {item.name}
-              </Link>
+                {item.name === 'Shop' ? (
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-accent transition-colors">
+                    <Link to={item.path} onClick={(e) => handleNavClick(e, item.path)}>
+                      {item.name}
+                    </Link>
+                    <ChevronDown size={14} className={`transition-transform duration-200 ${shopDropdownOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    onClick={(e) => handleNavClick(e, item.path)}
+                    className="hover:text-accent transition-colors"
+                  >
+                    {item.name}
+                  </Link>
+                )}
+
+                {/* Shop Dropdown */}
+                {item.name === 'Shop' && shopDropdownOpen && (
+                  <div className="absolute top-full left-0 w-64 bg-background border border-border shadow-xl rounded-b-xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-4 py-2 mb-2 border-b border-border/50">
+                      <Link 
+                        to="/shop" 
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-accent transition-colors"
+                        onClick={() => setShopDropdownOpen(false)}
+                      >
+                        All Products
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-1 gap-1">
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat._id}
+                          to={`/shop?category=${cat._id}`}
+                          className="px-4 py-2 hover:bg-accent/5 hover:text-accent transition-colors text-sm flex items-center justify-between group/item"
+                          onClick={() => setShopDropdownOpen(false)}
+                        >
+                          {cat.name}
+                          <ChevronRight size={14} className="opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
 
@@ -204,14 +250,6 @@ const Header = ({
             )}
             
             <div className="flex items-center gap-1 border-l border-border pl-2 sm:pl-4 ml-2 sm:ml-0">
-              <Link to={isAuthenticated ? "/shop/wishlist" : "/login"} className="p-2 hover:text-accent transition-colors relative">
-                <Heart size={20} />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent text-[9px] font-bold text-accent-foreground flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
               <Link to={isAuthenticated ? "/shop/cart" : "/login"} className="p-2 hover:text-accent transition-colors relative">
                 <ShoppingBag size={20} />
                 {cartCount > 0 && (
@@ -227,92 +265,109 @@ const Header = ({
 
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-[calc(80px+env(safe-area-inset-top))] z-40 bg-background">
-          <div className="px-4 py-4 space-y-2">
-            <Link 
-              to="/shop" 
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Store size={20} />
-              <span>Shop</span>
-            </Link>
+        <div className="lg:hidden fixed inset-0 top-[calc(60px+env(safe-area-inset-top))] z-40 bg-background overflow-y-auto">
+          <div className="px-4 py-6 space-y-6">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 px-4">Menu</h3>
+                <div className="space-y-1">
+                  <Link 
+                    to="/" 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${location.pathname === '/' ? 'bg-accent/10 text-accent font-bold' : 'hover:bg-accent/5'}`}
+                  >
+                    <Home size={20} className={location.pathname === '/' ? 'text-accent' : 'text-muted-foreground'} />
+                    <span>Home</span>
+                  </Link>
+                  
+                  {/* Expandable Shop Menu */}
+                  <div className="space-y-1">
+                    <button 
+                      onClick={() => setMobileShopOpen(!mobileShopOpen)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/shop') ? 'bg-accent/10 text-accent font-bold' : 'hover:bg-accent/5'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Store size={20} className={location.pathname.startsWith('/shop') ? 'text-accent' : 'text-muted-foreground'} />
+                        <span>Shop</span>
+                      </div>
+                      <ChevronDown size={18} className={`transition-transform duration-300 ${mobileShopOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {mobileShopOpen && (
+                      <div className="ml-4 pl-4 border-l-2 border-accent/20 space-y-1 py-1 animate-in slide-in-from-top-2 duration-300">
+                        <Link 
+                          to="/shop" 
+                          onClick={() => { setMobileMenuOpen(false); setMobileShopOpen(false); }}
+                          className="block px-4 py-2 text-sm text-muted-foreground hover:text-accent font-medium"
+                        >
+                          Show All Products
+                        </Link>
+                        {categories.map((cat) => (
+                          <Link
+                            key={cat._id}
+                            to={`/shop?category=${cat._id}`}
+                            onClick={() => { setMobileMenuOpen(false); setMobileShopOpen(false); }}
+                            className="block px-4 py-2 text-sm text-muted-foreground hover:text-accent font-medium truncate"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+            </div>
+
           
-            {isAuthenticated ? (
-              <>
-                <Link 
-                  to="/user" 
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <User size={20} />
-                  <span>Profile</span>
+            <div className="pt-6 border-t border-border">
+              {isAuthenticated ? (
+                <div className="space-y-1">
+                  <Link to="/user" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent/5 transition-colors">
+                    <User size={20} className="text-muted-foreground" />
+                    <span className="font-medium">My Profile</span>
+                  </Link>
+                  <button 
+                    onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent/5 transition-colors w-full text-left text-destructive"
+                  >
+                    <LogOut size={20} />
+                    <span className="font-medium">Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-primary text-primary-foreground font-medium transition-opacity">
+                  <User size={18} />
+                  <span>Login / Register</span>
                 </Link>
-                <Link 
-                  to="/shop/wishlist" 
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Heart size={20} />
-                  <span>Wishlist</span>
-                  {wishlistCount > 0 && <span className="ml-auto bg-accent text-accent-foreground px-2 py-0.5 rounded-full text-xs">{wishlistCount}</span>}
-                </Link>
-                <button 
-                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors w-full text-left"
-                >
-                  <LogOut size={20} />
-                  <span>Logout</span>
-                </button>
-              </>
-            ) : (
-              <Link 
-                to="/login" 
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <User size={20} />
-                <span>Login</span>
-              </Link>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Mobile Bottom Navigation Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 pb-safe">
-        <div className="flex items-center justify-around py-2">
-          <Link to="/shop" className="flex flex-col items-center gap-1 p-2 hover:text-accent transition-colors">
-            <Store size={20} />
-            <span className="text-xs">Shop</span>
+      {/* Mobile Bottom Navigation Bar (Hidden Wishlist) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border z-50 pb-safe shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)]">
+        <div className="flex items-center justify-around py-3 px-2">
+          <Link to="/" className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors ${location.pathname === '/' ? 'text-accent' : 'text-muted-foreground'}`}>
+            <Home size={22} strokeWidth={location.pathname === '/' ? 2.5 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
           </Link>
-          
-          {isAuthenticated ? (
-            <>
-              <Link to="/user" className="flex flex-col items-center gap-1 p-2 hover:text-accent transition-colors">
-                <User size={20} />
-                <span className="text-xs">Profile</span>
-              </Link>
-              <Link to="/shop/wishlist" className="flex flex-col items-center gap-1 p-2 hover:text-accent transition-colors relative">
-                <Heart size={20} />
-                {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-2 w-4 h-4 rounded-full bg-accent text-[8px] font-bold text-accent-foreground flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-                <span className="text-xs">Wishlist</span>
-              </Link>
-              <button onClick={handleLogout} className="flex flex-col items-center gap-1 p-2 hover:text-accent transition-colors">
-                <LogOut size={20} />
-                <span className="text-xs">Logout</span>
-              </button>
-            </>
-          ) : (
-            <Link to="/login" className="flex flex-col items-center gap-1 p-2 hover:text-accent transition-colors">
-              <User size={20} />
-              <span className="text-xs">Login</span>
-            </Link>
-          )}
+          <Link to="/shop" className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors ${location.pathname === '/shop' ? 'text-accent' : 'text-muted-foreground'}`}>
+            <Store size={22} strokeWidth={location.pathname === '/shop' ? 2.5 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-tight">Shop</span>
+          </Link>
+          <Link to={isAuthenticated ? "/shop/cart" : "/login"} className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors relative ${location.pathname === '/shop/cart' ? 'text-accent' : 'text-muted-foreground'}`}>
+            <ShoppingBag size={22} strokeWidth={location.pathname === '/shop/cart' ? 2.5 : 2} />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 right-2 w-4 h-4 rounded-full bg-accent text-[8px] font-bold text-accent-foreground flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+            <span className="text-[10px] font-bold uppercase tracking-tight">Cart</span>
+          </Link>
+          <Link to={isAuthenticated ? "/user" : "/login"} className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors ${location.pathname.startsWith('/user') ? 'text-accent' : 'text-muted-foreground'}`}>
+            <User size={22} strokeWidth={location.pathname.startsWith('/user') ? 2.5 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-tight">{isAuthenticated ? 'Profile' : 'Login'}</span>
+          </Link>
         </div>
       </div>
     </header>
