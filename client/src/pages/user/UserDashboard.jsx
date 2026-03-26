@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { productAPI, categoryAPI, wishlistAPI } from '../../services/api';
+import { productAPI, categoryAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { Heart, ChevronDown, SlidersHorizontal, SearchX, User } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal, SearchX, ShoppingBag } from 'lucide-react';
 
 const UserDashboard = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
-  const [wishlist, setWishlist] = useState([]);
-  const [wishlistLoading, setWishlistLoading] = useState(false);
   
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || '';
@@ -36,15 +34,6 @@ const UserDashboard = () => {
     }
   };
 
-  const fetchWishlist = async () => {
-    try {
-      const response = await wishlistAPI.getAll();
-      setWishlist(response.data || []);
-    } catch (error) {
-      console.error('Error fetching wishlist:', error);
-    }
-  };
-
   useEffect(() => {
     const category = searchParams.get('category') || '';
     setSelectedCategory(category);
@@ -53,9 +42,6 @@ const UserDashboard = () => {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-    if (isAuthenticated) {
-      fetchWishlist();
-    }
   }, []);
 
   // Sync category via URL when selected category changes
@@ -81,37 +67,11 @@ const UserDashboard = () => {
     (product) => product.active !== false
   );
 
-  const isInWishlist = (productId) => {
-    return wishlist.some((item) => item._id === productId);
-  };
-
-  const handleWishlistToggle = async (e, productId) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isAuthenticated) return;
-    
-    setWishlistLoading(true);
-    try {
-      if (isInWishlist(productId)) {
-        await wishlistAPI.remove(productId);
-        setWishlist(wishlist.filter((item) => item._id !== productId));
-      } else {
-        await wishlistAPI.add(productId);
-        await fetchWishlist();
-      }
-    } catch (error) {
-      console.error('Error toggling wishlist:', error);
-    } finally {
-      setWishlistLoading(false);
-    }
-  };
-
   const getImageUrl = (item) => {
     if (item.image && item.image.startsWith('http')) return item.image;
     return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
   };
 
-  // Calculate discount percentage
   const getDiscountPercent = (product) => {
     if (product.comparePrice && product.price && product.comparePrice > product.price) {
       return Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100);
@@ -132,9 +92,6 @@ const UserDashboard = () => {
 
   return (
     <div className="bg-background">
-      {/* Shop Header */}
-    
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 flex flex-col lg:flex-row gap-10">
         
         {/* Sidebar Filters */}
@@ -190,8 +147,6 @@ const UserDashboard = () => {
 
         {/* Product Grid */}
         <div className="flex-1">
-          
-
           {activeProducts.length === 0 ? (
             <div className="text-center py-24 bg-card rounded-2xl border border-border flex flex-col items-center">
               <SearchX size={48} className="text-muted-foreground/30 mb-4" />
@@ -207,12 +162,11 @@ const UserDashboard = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-6">
               {activeProducts.map((product) => (
-                <Link
-                  key={product._id}
-                  to={`/product/${product._id}`}
-                  className="group block"
-                >
-                  <div className="relative rounded-xl overflow-hidden aspect-[4/5] bg-muted mb-4 border border-border/50">
+                <div key={product._id} className="group flex flex-col">
+                  <Link
+                    to={`/product/${product._id}`}
+                    className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-muted mb-4 border border-border/50 block"
+                  >
                     <img
                       src={getImageUrl(product)}
                       alt={product.name}
@@ -220,36 +174,36 @@ const UserDashboard = () => {
                     />
                     
                     {/* Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
                        {product.isFeatured && (
-                         <span className="bg-accent text-accent-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm">
+                         <span className="bg-accent text-accent-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded shadow-sm">
                            Featured
                          </span>
                        )}
                        {getDiscountPercent(product) > 0 && (
-                         <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded shadow-sm">
-                           {getDiscountPercent(product)}% OFF
+                         <span className="bg-red-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded shadow-sm">
+                           -{getDiscountPercent(product)}%
                          </span>
                        )}
                     </div>
                     
-                    <button 
-                      className={`absolute top-3 right-3 p-2 rounded-full bg-background/90 hover:bg-background transition-all opacity-100 shadow-sm ${isInWishlist(product._id) ? 'text-red-500' : 'text-foreground hover:text-accent'}`}
-                      onClick={(e) => handleWishlistToggle(e, product._id)}
-                      disabled={wishlistLoading}
-                      title={isInWishlist(product._id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                    >
-                      <Heart size={16} className={isInWishlist(product._id) ? 'fill-current' : ''} />
-                    </button>
-                  </div>
+                    {/* Quick Add Overlay */}
+                    <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <button className="w-full py-3 bg-white/90 backdrop-blur-md text-foreground rounded-full font-bold text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 hover:bg-white">
+                        <ShoppingBag size={14} /> View Details
+                      </button>
+                    </div>
+                  </Link>
                   
-                  <div className="px-1">
-                    <p className="text-xs text-muted-foreground mb-1 font-medium">{product.category?.name || 'Uncategorized'}</p>
-                    <h3 className="text-base font-semibold text-foreground truncate group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-serif)' }}>
-                      {product.name}
-                    </h3>
+                  <div className="px-1 text-center">
+                    <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-widest font-bold">{product.category?.name || 'Uncategorized'}</p>
+                    <Link to={`/product/${product._id}`}>
+                      <h3 className="text-lg font-bold text-foreground mb-2 truncate group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-serif)' }}>
+                        {product.name}
+                      </h3>
+                    </Link>
                     
-                    <div className="mt-2 flex items-baseline gap-2">
+                    <div className="flex items-baseline justify-center gap-2">
                       <span className="text-base font-bold text-foreground">
                         Rs.{product.price}
                       </span>
@@ -260,7 +214,7 @@ const UserDashboard = () => {
                       )}
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}

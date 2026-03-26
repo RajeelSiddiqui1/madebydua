@@ -1,26 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { productAPI, categoryAPI, wishlistAPI, ratingAPI, cartAPI } from '../services/api';
+import { productAPI, categoryAPI, cartAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Heart, ShoppingBag, Star, Image, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Image, ChevronLeft, ChevronRight } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const ProductDetailContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
   const [categories, setCategories] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [ratings, setRatings] = useState([]);
-  const [averageRating, setAverageRating] = useState(0);
-  const [ratingLoading, setRatingLoading] = useState(false);
-  const [userRating, setUserRating] = useState(0);
-  const [ratingComment, setRatingComment] = useState('');
   const [cartLoading, setCartLoading] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -67,7 +60,7 @@ const ProductDetailContent = () => {
           const related = allProducts.filter(
             (p) =>
               p._id !== id &&
-              p.category === foundProduct.category &&
+              (p.category?._id === foundProduct.category?._id || p.category === foundProduct.category) &&
               p.active !== false
           );
           setRelatedProducts(related.slice(0, 4));
@@ -80,70 +73,6 @@ const ProductDetailContent = () => {
     };
     fetchData();
   }, [id]);
-
-  // Check wishlist status
-  useEffect(() => {
-    const checkWishlist = async () => {
-      if (isAuthenticated && product) {
-        try {
-          const response = await wishlistAPI.getAll();
-          const wishlistItems = response.data || [];
-          setIsInWishlist(wishlistItems.some((item) => item._id === product._id));
-        } catch (error) {
-          console.error('Error checking wishlist:', error);
-        }
-      }
-    };
-    checkWishlist();
-  }, [isAuthenticated, product]);
-
-  // Fetch ratings
-  useEffect(() => {
-    const fetchRatings = async () => {
-      if (product) {
-        try {
-          const response = await ratingAPI.getProductRatings(product._id);
-          setRatings(response.data.ratings || []);
-          setAverageRating(response.data.averageRating || 0);
-
-          // Check if user has already rated
-          if (user) {
-            const existingRating = response.data.ratings?.find(
-              (r) => r.user?._id === user._id
-            );
-            if (existingRating) {
-              setUserRating(existingRating.rating);
-              setRatingComment(existingRating.comment || '');
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching ratings:', error);
-        }
-      }
-    };
-    fetchRatings();
-  }, [product, user]);
-
-
-  const handleRatingSubmit = async (rating) => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    setRatingLoading(true);
-    try {
-      await ratingAPI.rateProduct(product._id, { rating, comment: ratingComment });
-      // Refresh ratings
-      const response = await ratingAPI.getProductRatings(product._id);
-      setRatings(response.data.ratings || []);
-      setAverageRating(response.data.averageRating || 0);
-      setUserRating(rating);
-    } catch (error) {
-      console.error('Error submitting rating:', error);
-    } finally {
-      setRatingLoading(false);
-    }
-  };
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -163,23 +92,19 @@ const ProductDetailContent = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+        <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
-
-
-  const getImageUrl = (item) => {
-    if (item.image && item.image.startsWith('http')) {
-      return item.image;
-    }
-    return item.image ? `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${item.image}` : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop';
-  };
 
   if (!product) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-700">Product not found</h2>
-        <Link to="/page/user" className="text-blue-600 hover:underline mt-4 inline-block">
-          Back to Products
+      <div className="text-center py-24">
+        <h2 className="text-2xl font-bold text-muted-foreground" style={{ fontFamily: 'var(--font-serif)' }}>Product not found</h2>
+        <Link to="/shop" className="text-accent hover:underline mt-4 inline-block font-medium">
+          Back to Shop
         </Link>
       </div>
     );
@@ -190,188 +115,169 @@ const ProductDetailContent = () => {
   )?.name;
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Breadcrumb */}
-      <nav className="text-sm mb-6">
-        <Link to="/page/user" className="text-blue-600 hover:underline">
-          Products
-        </Link>
-        {categoryName && (
-          <>
-            <span className="mx-2 text-gray-400">/</span>
-            <span className="text-gray-600">{categoryName}</span>
-          </>
-        )}
-      </nav>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
         {/* Product Image Gallery */}
-        <div className="bg-gray-100 rounded-lg overflow-hidden relative">
-          {allImages.length > 0 ? (
-            <>
-              <div className="relative">
+        <div className="space-y-4">
+          <div className="bg-secondary/5 rounded-2xl overflow-hidden relative aspect-square border border-border/50 group">
+            {allImages.length > 0 ? (
+              <>
                 <img
                   src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${allImages[selectedImageIndex]}`}
                   alt={product.name}
-                  className="w-full h-96 object-contain"
+                  className="w-full h-full object-cover"
                 />
-                {/* Navigation arrows for multiple images */}
                 {allImages.length > 1 && (
                   <>
                     <button
                       onClick={() => setSelectedImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1))}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button
                       onClick={() => setSelectedImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1))}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <ChevronRight size={20} />
                     </button>
                   </>
                 )}
+              </>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/30">
+                <Image size={64} strokeWidth={1} />
+                <p className="mt-2 text-sm font-medium">No Image Available</p>
               </div>
-              {/* Thumbnail Gallery */}
-              {allImages.length > 1 && (
-                <div className="flex gap-2 mt-4 overflow-x-auto pb-2 px-2">
-                  {allImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImageIndex(idx)}
-                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImageIndex === idx ? 'border-blue-600 ring-2 ring-blue-200' : 'border-transparent hover:border-gray-300'
-                      }`}
-                    >
-                      <img
-                        src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${img}`}
-                        alt={`${product.name} ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="w-full h-96 flex items-center justify-center text-gray-400">
-              <div className="text-center">
-                <Image size={48} className="mx-auto mb-2" />
-                <p>No Image Available</p>
+            )}
+            
+            {/* Discount Badge */}
+            {discountPercent > 0 && (
+              <div className="absolute top-6 left-6 bg-red-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-xl">
+                {discountPercent}% OFF
               </div>
-            </div>
-          )}
-          {/* Out of Stock Badge */}
-          {(!product.quantity || product.quantity <= 0) && (
-            <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
-              OUT OF STOCK
+            )}
+            
+            {/* Out of Stock Badge */}
+            {(!product.quantity || product.quantity <= 0) && (
+              <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
+                <span className="bg-red-600 text-white px-6 py-2 rounded-full font-bold text-sm shadow-2xl tracking-widest uppercase">
+                  Out of Stock
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {/* Thumbnails */}
+          {allImages.length > 1 && (
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImageIndex(idx)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                    selectedImageIndex === idx ? 'border-accent shadow-md' : 'border-transparent hover:border-border'
+                  }`}
+                >
+                  <img
+                    src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${img}`}
+                    alt={`${product.name} ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
             </div>
           )}
         </div>
 
         {/* Product Info */}
-        <div className='px-2'>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+             <span className="bg-accent/10 text-accent text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+               {categoryName || 'Uncategorized'}
+             </span>
+             <span className="w-1 h-1 rounded-full bg-border"></span>
+             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+               SKU: DU-{product._id.toString().slice(-6).toUpperCase()}
+             </span>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
             {product.name}
           </h1>
-          {categoryName && (
-            <p className="text-sm text-gray-500 mb-2">Category: {categoryName}</p>
-          )}
 
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-              Handcrafted with Love
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 mb-6">
-            <span className="text-3xl font-bold text-blue-600">
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-3xl font-bold text-foreground">
               Rs.{product.price}
             </span>
             {product.comparePrice && product.comparePrice > product.price && (
-              <>
-                <span className="text-xl text-gray-400 line-through">
-                  Rs.{product.comparePrice}
-                </span>
-                <span className="text-sm font-bold bg-red-500 text-white px-2 py-1 rounded">
-                  {discountPercent}% OFF
-                </span>
-              </>
+              <span className="text-xl text-muted-foreground line-through font-medium">
+                Rs.{product.comparePrice}
+              </span>
             )}
           </div>
 
-          {product.shortDesc && (
-            <p className="text-gray-600 mb-4 px-2 ">{product.shortDesc}</p>
-          )}
-
-          {product.longDesc && (
-            <div className="mb-6 px-2 ">
-              <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <p className="text-gray-600 whitespace-pre-wrap">{product.longDesc}</p>
-            </div>
-          )}
-
-          {/* Add to Cart & Wishlist */}
-          <div className="mt-8 flex gap-4">
-            {isAuthenticated ? (
-              <>
-                <button
-                  onClick={handleAddToCart}
-                  disabled={cartLoading}
-                  className={`bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 w-full md:w-auto ${addedToCart ? 'bg-green-600' : ''}`}
-                >
-                  <ShoppingBag size={20} />
-                  {addedToCart ? 'Added!' : cartLoading ? 'Adding...' : 'Add to Cart'}
-                </button>
-              </>
-            ) : (
-              <div className="flex gap-4">
-                <button
-                  onClick={() => navigate('/login')}
-                  className="bg-gray-300 text-gray-700 px-8 py-3 rounded-lg cursor-not-allowed w-full md:w-auto"
-                  disabled
-                >
-                  Login to Add to Cart
-                </button>
+          <div className="space-y-6 mb-10">
+            <div className="bg-secondary/10 p-4 rounded-2xl flex items-center gap-4 border border-accent/10">
+              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m11.5 11.5 2.25 2.25L18.5 9"></path><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"></path></svg>
               </div>
-            )}
+              <div>
+                <h4 className="font-bold text-sm">Handcrafted Excellence</h4>
+                <p className="text-xs text-muted-foreground">Each piece is unique and made with premium clay.</p>
+              </div>
+            </div>
+            
+            <div className="px-1 text-muted-foreground leading-relaxed whitespace-pre-wrap text-sm md:text-base">
+              {product.longDesc || product.shortDesc}
+            </div>
           </div>
 
+          {/* Action Buttons */}
+          <div className="mt-auto space-y-4">
+            <button
+              onClick={handleAddToCart}
+              disabled={cartLoading || (!product.quantity || product.quantity <= 0)}
+              className={`w-full py-4 rounded-full font-bold text-base transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.98] ${
+                addedToCart 
+                  ? 'bg-green-600 text-white' 
+                  : (product.quantity > 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed')
+              }`}
+            >
+              <ShoppingBag size={20} className={cartLoading ? 'animate-bounce' : ''} />
+              {addedToCart ? 'Added to Cart!' : cartLoading ? 'Adding...' : (product.quantity > 0 ? 'Add to Cart' : 'Currently Unavailable')}
+            </button>
+            
+            <p className="text-center text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-bold">
+              Secure checkout with Cash on Delivery available
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="pt-20 border-t border-border">
+          <div className="flex items-center justify-between mb-10">
+            <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>More to Explore</h2>
+            <Link to="/shop" className="text-sm font-bold text-accent hover:underline">View All</Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {relatedProducts.map((relProduct) => (
               <Link
                 key={relProduct._id}
                 to={`/product/${relProduct._id}`}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                className="group flex flex-col"
               >
-                <div className="h-48 bg-gray-200">
-                  {relProduct.image ? (
-                    <img
-                      src={
-                      
-                          `${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${relProduct.image}`
-                         } 
-                      alt={relProduct.name || "Product"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No Image
-                    </div>
-                  )}
+                <div className="aspect-[4/5] bg-secondary/5 rounded-2xl overflow-hidden mb-4 border border-border/50">
+                  <img
+                    src={`${import.meta.env.VITE_BACKEND_URL_PRODUCT_IMAGE}/${relProduct.image}`}
+                    alt={relProduct.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900">{relProduct.name}</h3>
-                  <p className="text-blue-600 font-bold mt-1">Rs.{relProduct.price}</p>
-                </div>
+                <h3 className="font-bold text-sm text-foreground mb-1 truncate">{relProduct.name}</h3>
+                <span className="text-sm font-bold text-accent">Rs.{relProduct.price}</span>
               </Link>
             ))}
           </div>
@@ -383,13 +289,13 @@ const ProductDetailContent = () => {
 
 const ProductDetailWithLayout = () => {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="min-h-screen">
+      <main className="flex-1">
         <ProductDetailContent />
       </main>
       <Footer />
-    </>
+    </div>
   );
 };
 

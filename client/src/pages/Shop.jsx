@@ -24,10 +24,10 @@ const Shop = () => {
   }, [isAuthenticated]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col" style={{ fontFamily: 'var(--font-sans)' }}>
+    <div className="min-h-screen bg-background text-foreground flex flex-col" style={{ fontFamily: 'var(--font-sans)', paddingTop: 'env(safe-area-inset-top)' }}>
       <Header cartCount={cartCount} />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-20 lg:pb-0">
         <Outlet />
       </main>
 
