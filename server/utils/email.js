@@ -39,7 +39,7 @@ export const sendOrderNotification = async (order, user) => {
         <ul>${orderItems}</ul>
         <p>Please log in to the admin panel to process this order.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua - Unique Handcrafted Ceramics</p>
+        <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua - </p>
       </div>
     `;
 
@@ -71,7 +71,7 @@ export const sendOrderNotification = async (order, user) => {
           <p>We'll notify you once your order status is updated.</p>
           <p>Thank you for supporting our craft!</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua - Unique Handcrafted Ceramics</p>
+          <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua - </p>
         </div>
       `,
     });
@@ -109,7 +109,7 @@ export const sendStatusUpdateNotification = async (order, user) => {
         </div>
         <p>If you have any questions, feel free to reach out to us.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-        <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua - Unique Handcrafted Ceramics</p>
+        <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua </p>
       </div>
     `;
 
