@@ -72,7 +72,7 @@ const AdminDashboard = () => {
     { title: 'Categories', count: stats.categories, color: 'bg-gradient-to-br from-green-500 to-green-600', icon: Tag, path: '/page/admin/categories' },
     { title: 'Users', count: stats.users, color: 'bg-gradient-to-br from-purple-500 to-purple-600', icon: Users, path: '/page/admin' },
     { title: 'Orders', count: stats.orders, color: 'bg-gradient-to-br from-orange-500 to-orange-600', icon: ShoppingBag, path: '/page/admin/orders' },
-    { title: 'Revenue', count: `Rs.${stats.totalRevenue.toFixed(2)}`, color: 'bg-gradient-to-br from-emerald-500 to-emerald-600', icon: DollarSign, path: '/page/admin' },
+    { title: 'Revenue', count: `Rs.${stats.totalRevenue.toLocaleString()}`, color: 'bg-gradient-to-br from-emerald-500 to-emerald-600', icon: DollarSign, path: '/page/admin' },
     { title: 'Coupons', count: stats.coupons, color: 'bg-gradient-to-br from-pink-500 to-pink-600', icon: Tag, path: '/page/admin/coupons' },
   ];
 

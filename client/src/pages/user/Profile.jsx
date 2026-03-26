@@ -8,6 +8,14 @@ const Profile = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders');
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    deliveredOrders: 0,
+    pendingOrders: 0,
+    shippedOrders: 0,
+    cancelledOrders: 0,
+    totalSpent: 0
+  });
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -22,9 +30,26 @@ const Profile = () => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await orderAPI.getStats();
+      setStats(response.data || {
+        totalOrders: 0,
+        deliveredOrders: 0,
+        pendingOrders: 0,
+        shippedOrders: 0,
+        cancelledOrders: 0,
+        totalSpent: 0
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchOrders();
+      fetchStats();
     }
   }, [isAuthenticated]);
 
@@ -107,6 +132,34 @@ const Profile = () => {
             <LogOut size={16} className="mx-auto mb-1 text-red-500" />
             <span className="font-medium text-sm text-red-500">Logout</span>
           </button>
+        </div>
+
+        {/* Order Stats */}
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
+          <div className="bg-card rounded-lg border border-border p-3 text-center">
+            <p className="text-2xl font-bold text-foreground">{stats.totalOrders}</p>
+            <p className="text-xs text-muted-foreground">Total Orders</p>
+          </div>
+          <div className="bg-green-50 rounded-lg border border-green-200 p-3 text-center">
+            <p className="text-2xl font-bold text-green-700">{stats.deliveredOrders}</p>
+            <p className="text-xs text-green-600">Delivered</p>
+          </div>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 text-center">
+            <p className="text-2xl font-bold text-yellow-700">{stats.pendingOrders}</p>
+            <p className="text-xs text-yellow-600">Pending</p>
+          </div>
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 text-center">
+            <p className="text-2xl font-bold text-purple-700">{stats.shippedOrders}</p>
+            <p className="text-xs text-purple-600">Shipped</p>
+          </div>
+          <div className="bg-red-50 rounded-lg border border-red-200 p-3 text-center">
+            <p className="text-2xl font-bold text-red-700">{stats.cancelledOrders}</p>
+            <p className="text-xs text-red-600">Cancelled</p>
+          </div>
+          <div className="bg-accent/10 rounded-lg border border-accent/20 p-3 text-center">
+            <p className="text-2xl font-bold text-accent">Rs.{stats.totalSpent.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Total Spent</p>
+          </div>
         </div>
 
         {/* Tabs */}

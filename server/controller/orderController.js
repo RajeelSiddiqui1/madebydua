@@ -118,6 +118,35 @@ export const getUserOrders = async (req, res) => {
   }
 };
 
+// 📊 Get User Stats (total orders, delivered orders, etc.)
+export const getUserStats = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get all orders for this user
+    const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+    
+    // Calculate stats
+    const totalOrders = orders.length;
+    const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
+    const pendingOrders = orders.filter(o => o.status === 'pending').length;
+    const shippedOrders = orders.filter(o => o.status === 'shipped').length;
+    const cancelledOrders = orders.filter(o => o.status === 'cancelled').length;
+    const totalSpent = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+    
+    res.json({
+      totalOrders,
+      deliveredOrders,
+      pendingOrders,
+      shippedOrders,
+      cancelledOrders,
+      totalSpent
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // 🔄 Update Order Status (Admin only)
 export const updateOrderStatus = async (req, res) => {
   try {

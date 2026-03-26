@@ -99,6 +99,7 @@ export const orderAPI = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   getOrders: () => api.get('/order'),
+  getStats: () => api.get('/order/stats'),
   getAllOrders: () => api.get('/order/all'),
   updateStatus: (orderId, data) => api.put(`/order/status/${orderId}`, data),
   deleteReceipt: (orderId) => api.delete(`/order/receipt/${orderId}`),
