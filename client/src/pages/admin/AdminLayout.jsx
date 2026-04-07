@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut, Receipt } from 'lucide-react';
+import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut, Receipt, MessageSquare } from 'lucide-react';
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -19,6 +19,7 @@ const AdminLayout = () => {
     { path: '/page/admin/products', label: 'Products', icon: Package },
     { path: '/page/admin/orders', label: 'Orders', icon: Receipt },
     { path: '/page/admin/coupons', label: 'Coupons', icon: Tag },
+    { path: '/page/admin/testimonials', label: 'Reviews', icon: MessageSquare },
   ];
 
   return (
@@ -60,7 +61,7 @@ const AdminLayout = () => {
         </nav>
         
         {/* Shop Link */}
-        <div className="px-6 py-3 mt-4 border-t border-gray-700">
+        {/* <div className="px-6 py-3 mt-4 border-t border-gray-700">
           <p className="text-xs text-gray-500 uppercase mb-2">Quick Links</p>
           <NavLink
             to="/shop"
@@ -70,7 +71,7 @@ const AdminLayout = () => {
             <ShoppingBag size={20} />
             View Shop
           </NavLink>
-        </div>
+        </div> */}
         
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <button

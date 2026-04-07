@@ -23,9 +23,7 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    }
+    fetchCart();
   }, [isAuthenticated]);
 
   const handleQuantityChange = async (productId, newQuantity) => {
@@ -191,13 +189,19 @@ const Cart = () => {
                 
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>Rs.{calculateTotal().toFixed(2)}</span>
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span>{calculateTotal() >= 3499 ? 'Free' : 'Rs.200.00'}</span>
                   </div>
                   
+                  {calculateTotal() < 3499 && (
+                    <div className="text-[10px] text-accent bg-accent/5 p-2 rounded-lg border border-accent/20 mt-2">
+                       Add Rs.{(3499 - calculateTotal()).toFixed(2)} more for <span className="font-bold">Free Shipping</span>!
+                    </div>
+                  )}
+
                   <div className="border-t border-border pt-3 flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>Rs.{(calculateTotal() * 1.1).toFixed(2)}</span>
+                    <span>Rs.{(calculateTotal() >= 3499 ? calculateTotal() : calculateTotal() + 200).toFixed(2)}</span>
                   </div>
                 </div>
 

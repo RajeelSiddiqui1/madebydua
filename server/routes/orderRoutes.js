@@ -1,16 +1,15 @@
 import express from "express";
-import { protect, isAdmin } from "../middleware/authMiddleware.js";
+import { protect, isAdmin, optionalAuth } from "../middleware/authMiddleware.js";
 import { checkout, getUserOrders, updateOrderStatus, getAllOrders, deletePaymentReceipt, getUserStats } from "../controller/orderController.js";
 import upload from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-router.use(protect);
-router.post("/checkout", upload("payments").single('paymentReceipt'), checkout);
-router.get("/", getUserOrders);
-router.get("/stats", getUserStats);
-router.get("/all", isAdmin, getAllOrders);
-router.put("/status/:orderId", isAdmin, updateOrderStatus);
-router.delete("/receipt/:orderId", isAdmin, deletePaymentReceipt);
+router.post("/checkout", protect, upload("payments").single('paymentReceipt'), checkout);
+router.get("/", protect, getUserOrders);
+router.get("/stats", protect, getUserStats);
+router.get("/all", protect, isAdmin, getAllOrders);
+router.put("/status/:orderId", protect, isAdmin, updateOrderStatus);
+router.delete("/receipt/:orderId", protect, isAdmin, deletePaymentReceipt);
 
 export default router;

@@ -10,11 +10,22 @@ import User from "../models/userModel.js";
 // ➕ Checkout / Create Order
 export const checkout = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user ? req.user._id : null;
+    const guestId = req.headers['guest-id'];
     const { shippingAddress, coupons, paymentMethod } = req.body;
 
-    const cart = await Cart.findOne({ user: userId }).populate("products.product");
+    if (!userId && !guestId) return res.status(400).json({ message: "No user or guest ID provided" });
+
+    const query = userId ? { user: userId } : { guestId };
+    const cart = await Cart.findOne(query).populate("products.product");
     if (!cart || cart.products.length === 0) return res.status(400).json({ message: "Cart is empty" });
+
+    // Check if returning user
+    let isReturningUser = false;
+    if (userId) {
+      const priorOrdersCount = await Order.countDocuments({ user: userId });
+      isReturningUser = priorOrdersCount > 0;
+    }
 
     let totalAmount = cart.products.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
@@ -76,6 +87,11 @@ export const checkout = async (req, res) => {
       }
     }
 
+    // Calculate returning user discount (10%)
+    if (isReturningUser && discountAmount === 0) { // Apply 10% if no other coupon was used
+      discountAmount += (totalAmount * 10) / 100;
+    }
+
     const finalAmount = totalAmount - discountAmount;
 
     // Handle payment receipt upload
@@ -84,8 +100,7 @@ export const checkout = async (req, res) => {
       paymentReceipt = req.file.filename;
     }
 
-    const order = await Order.create({
-      user: userId,
+    const orderPayload = {
       products: cart.products.map((p) => ({ product: p.product._id, quantity: p.quantity })),
       totalAmount: finalAmount,
       shippingAddress,
@@ -93,9 +108,16 @@ export const checkout = async (req, res) => {
       discountAmount: discountAmount,
       paymentMethod: paymentMethod || "cash_on_delivery",
       paymentReceipt: paymentReceipt,
-      // If payment method is not cash on delivery, mark as pending payment verification
       paymentStatus: paymentMethod && paymentMethod !== "cash_on_delivery" ? "pending" : "pending",
-    });
+    };
+    
+    if (userId) {
+      orderPayload.user = userId;
+    } else {
+      orderPayload.guestId = guestId;
+    }
+
+    const order = await Order.create(orderPayload);
 
     // Send email notifications (non-blocking)
     const orderForEmail = {

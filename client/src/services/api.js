@@ -24,6 +24,15 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Add Guest ID for anonymous cart/checkout
+  let guestId = localStorage.getItem('guestId');
+  if (!guestId) {
+    guestId = 'guest_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    localStorage.setItem('guestId', guestId);
+  }
+  config.headers['Guest-Id'] = guestId;
+
   return config;
 });
 
@@ -103,6 +112,14 @@ export const orderAPI = {
   getAllOrders: () => api.get('/order/all'),
   updateStatus: (orderId, data) => api.put(`/order/status/${orderId}`, data),
   deleteReceipt: (orderId) => api.delete(`/order/receipt/${orderId}`),
+};
+
+// Testimonial APIs
+export const testimonialAPI = {
+  getAll: () => api.get('/testimonial'),
+  create: (data) => api.post('/testimonial', data),
+  update: (id, data) => api.put(`/testimonial/${id}`, data),
+  delete: (id) => api.delete(`/testimonial/${id}`),
 };
 
 // Admin APIs

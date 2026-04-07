@@ -68,14 +68,13 @@ const Header = ({
     <header className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
       {/* Free Shipping Banner */}
       <div className="bg-accent text-accent-foreground text-center py-1 text-xs font-medium">
-        🚚 Free shipping on orders above Rs.2500
+        🚚 Free shipping on orders above Rs.3499
       </div>
       
       {/* Mobile Header */}
       <div className="lg:hidden max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-        {/* Logo - Left */}
-        <Link to="/" className="text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-          Handmade By Dua
+        <Link to="/" className="flex items-center gap-2 group transition-all duration-300" style={{ fontFamily: 'var(--font-serif)' }}>
+           <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/90 bg-clip-text text-transparent">Handmade By Dua</span>
         </Link>
         
         {/* Breadcrumb - Right */}
@@ -127,8 +126,9 @@ const Header = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold tracking-tight shrink-0 hidden lg:block" style={{ fontFamily: 'var(--font-serif)' }}>
-            Handmade By Dua
+          <Link to="/" className="flex items-center gap-3 shrink-0 hidden lg:flex group transition-all duration-300" style={{ fontFamily: 'var(--font-serif)' }}>
+           
+            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/90 bg-clip-text text-transparent">Handmade By Dua</span>
           </Link>
 
           {/* Search */}
@@ -250,7 +250,7 @@ const Header = ({
             )}
             
             <div className="flex items-center gap-1 border-l border-border pl-2 sm:pl-4 ml-2 sm:ml-0">
-              <Link to={isAuthenticated ? "/shop/cart" : "/login"} className="p-2 hover:text-accent transition-colors relative">
+              <Link to="/shop/cart" className="p-2 hover:text-accent transition-colors relative">
                 <ShoppingBag size={20} />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent text-[9px] font-bold text-accent-foreground flex items-center justify-center">
@@ -355,7 +355,7 @@ const Header = ({
             <Store size={22} strokeWidth={location.pathname === '/shop' ? 2.5 : 2} />
             <span className="text-[10px] font-bold uppercase tracking-tight">Shop</span>
           </Link>
-          <Link to={isAuthenticated ? "/shop/cart" : "/login"} className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors relative ${location.pathname === '/shop/cart' ? 'text-accent' : 'text-muted-foreground'}`}>
+          <Link to="/shop/cart" className={`flex flex-col items-center gap-1 min-w-[64px] transition-colors relative ${location.pathname === '/shop/cart' ? 'text-accent' : 'text-muted-foreground'}`}>
             <ShoppingBag size={22} strokeWidth={location.pathname === '/shop/cart' ? 2.5 : 2} />
             {cartCount > 0 && (
               <span className="absolute -top-1 right-2 w-4 h-4 rounded-full bg-accent text-[8px] font-bold text-accent-foreground flex items-center justify-center">

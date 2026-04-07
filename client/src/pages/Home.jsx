@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Truck, Shield, RotateCcw, Heart, Image, Building2 } from 'lucide-react';
-import { productAPI, categoryAPI } from '../services/api';
+import { ChevronRight, Truck, Shield, RotateCcw, Heart, Image, Building2, Package, Star } from 'lucide-react';
+import { productAPI, categoryAPI, testimonialAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -17,6 +17,8 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+  const [currentReview, setCurrentReview] = useState(0);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -24,14 +26,16 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, featuredRes, categoriesRes] = await Promise.all([
+        const [productsRes, featuredRes, categoriesRes, testimonialsRes] = await Promise.all([
           productAPI.getAll(),
           productAPI.getFeatured(),
           categoryAPI.getAll(),
+          testimonialAPI.getAll()
         ]);
         setProducts(productsRes.data?.filter(p => p.active !== false) || []);
         setFeaturedProducts(featuredRes.data?.filter(p => p.active !== false) || []);
         setCategories(categoriesRes.data || []);
+        setTestimonials(testimonialsRes.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -40,6 +44,15 @@ const Home = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (testimonials.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentReview((prev) => (prev + 1) % testimonials.length);
+      }, 5000); // changes review every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [testimonials]);
 
   useEffect(() => {
     const fetchWishlistCount = async () => {
@@ -116,7 +129,7 @@ const Home = () => {
       />
 
       {/* ── Hero ── */}
-      <section className="relative h-[70vh] min-h-[400px] overflow-hidden">
+      <section className="relative h-[50vh] min-h-[250px] overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1920&h=1080&fit=crop"
           alt="Beautiful Handcrafted Pottery"
@@ -124,11 +137,11 @@ const Home = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 to-transparent" />
         <div className="relative z-10 h-full flex flex-col justify-center px-8 sm:px-16 lg:px-24 max-w-3xl">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-[1.1] text-background mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
-            Beautiful <span className="text-accent italic">Handcrafted</span> Pottery
+          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-light leading-[1.1] text-background mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+            Handmade By <span className="text-accent italic">Syeda DuaeZahra</span>
           </h1>
           <p className="text-background/80 text-lg mb-8 max-w-md">
-            Discover our unique collection of handcrafted ceramics. Each piece is made with care.
+            Each piece is handmade with care to add warmth and beauty to your home
           </p>
           <div>
             <Link
@@ -269,6 +282,102 @@ const Home = () => {
         )}
       </section>
 
+      {/* ── Features ── */}
+      <section className="bg-secondary/50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
+                <Shield size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Repeated Customer</h3>
+                <p className="text-sm text-muted-foreground mt-1">10% off on your next purchase</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
+                <Heart size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Careful Packaging</h3>
+                <p className="text-sm text-muted-foreground mt-1">Securely packed for safe arrival</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
+                <Package size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Prepaid Order</h3>
+                <p className="text-sm text-muted-foreground mt-1">Enjoy free shopping on order above 3499</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
+                <Truck size={24} />
+              </div>
+              <div>
+                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Nationwide Delivery</h3>
+                <p className="text-sm text-muted-foreground mt-1">Delivery available across Pakistan</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Reviews ── */}
+      {testimonials.length > 0 && (
+        <section className="bg-card py-20 overflow-hidden">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-semibold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>Kind Words</h2>
+              <p className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">What our lovely customers say</p>
+            </div>
+            
+            <div className="relative group">
+              <div className="overflow-hidden">
+                 <div 
+                   className="flex transition-transform duration-700 ease-in-out" 
+                   style={{ transform: `translateX(-${currentReview * 100}%)` }}
+                 >
+                   {testimonials.map((testimonial) => (
+                     <div key={testimonial._id} className="w-full flex-shrink-0 px-4">
+                       <div className="bg-background/50 backdrop-blur-sm p-10 rounded-3xl border border-border shadow-soft text-center h-full flex flex-col justify-center items-center">
+                         <div className="text-accent mb-6 flex gap-1 justify-center">
+                           {[...Array(5)].map((_, i) => (
+                             <Star key={i} size={20} fill={i < testimonial.rating ? "currentColor" : "none"} stroke={i < testimonial.rating ? "currentColor" : "gray"} />
+                           ))}
+                         </div>
+                         <p className="text-lg lg:text-xl text-foreground font-medium leading-relaxed italic mb-8 max-w-2xl">
+                           "{testimonial.reviewText}"
+                         </p>
+                         <div className="flex items-center gap-3">
+                            <div className="w-10 h-[1px] bg-accent/30"></div>
+                            <h4 className="font-bold text-sm tracking-widest uppercase">{testimonial.name}</h4>
+                            <div className="w-10 h-[1px] bg-accent/30"></div>
+                         </div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+              </div>
+              
+              {/* Pagination Dots */}
+              <div className="flex justify-center gap-3 mt-10">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentReview(index)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${index === currentReview ? 'w-8 bg-accent' : 'w-2 bg-accent/20'}`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
       
       <Footer />
     </div>

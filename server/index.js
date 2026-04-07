@@ -11,6 +11,7 @@ import ratingRoute from "./routes/ratingRoutes.js"
 import wishListRoute from "./routes/wishListRoutes.js"
 import cartRoute from "./routes/cartRoutes.js"
 import orderRoute from "./routes/orderRoutes.js"
+import testimonialRoute from "./routes/testimonialRoutes.js"
 import dbConnect from "./lib/db.js"
 
 dotenv.config()
@@ -34,21 +35,21 @@ try {
 }
 
 app.use(cors({
-  origin: ["http://localhost:5174","http://153.92.209.177:5174", "https://madebydua.com", "https://www.madebydua.com"],
+  origin: ["http://localhost:5173","http://153.92.209.177:5174", "https://madebydua.com", "https://www.madebydua.com"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Guest-Id', 'guest-id']
 }));
 
 // Dynamic CORS headers based on request origin
 app.use((req, res, next) => {
-  const allowedOrigins = ["http://localhost:5174", "http://153.92.209.177:5174", "https://madebydua.com", "https://www.madebydua.com"];
+  const allowedOrigins = ["http://localhost:5173", "http://153.92.209.177:5174", "https://madebydua.com", "https://www.madebydua.com"];
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
   }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Guest-Id, guest-id');
   res.header('Access-Control-Allow-Credentials', 'true');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
@@ -67,6 +68,7 @@ app.use("/api/rating", ratingRoute)
 app.use("/api/wishlist", wishListRoute)
 app.use("/api/cart", cartRoute)
 app.use("/api/order", orderRoute)
+app.use("/api/testimonial", testimonialRoute)
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

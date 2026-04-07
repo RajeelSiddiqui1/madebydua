@@ -11,6 +11,7 @@ const Checkout = () => {
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [error, setError] = useState('');
+  const [isReturningUser, setIsReturningUser] = useState(false);
   const [shippingAddress, setShippingAddress] = useState({
     street: '',
     city: '',
@@ -58,8 +59,21 @@ const Checkout = () => {
   };
 
   useEffect(() => {
+    fetchCart();
+    
+    // Check returning user
     if (isAuthenticated) {
-      fetchCart();
+      const fetchUserStats = async () => {
+        try {
+          const statsRes = await orderAPI.getStats();
+          if (statsRes.data?.totalOrders > 0) {
+            setIsReturningUser(true);
+          }
+        } catch (err) {
+          console.error("Error fetching user stats", err);
+        }
+      }
+      fetchUserStats();
     }
   }, [isAuthenticated]);
 
@@ -71,11 +85,15 @@ const Checkout = () => {
 
   const calculateDiscount = () => {
     let totalDiscount = 0;
-    Object.values(appliedCoupons).forEach(coupon => {
-      if (coupon) {
+    const appliedCouponsList = Object.values(appliedCoupons).filter(c => c);
+    
+    if (appliedCouponsList.length > 0) {
+      appliedCouponsList.forEach(coupon => {
         totalDiscount += coupon.discount || 0;
-      }
-    });
+      });
+    } else if (isReturningUser) {
+       totalDiscount = (calculateTotal() * 10) / 100;
+    }
     return totalDiscount;
   };
 
@@ -85,7 +103,7 @@ const Checkout = () => {
 
   // Shipping charge
   const SHIPPING_CHARGE = 200;
-  const FREE_SHIPPING_THRESHOLD = 2500;
+  const FREE_SHIPPING_THRESHOLD = 3499;
 
   const calculateShipping = () => {
     const subtotal = calculateTotal() - calculateDiscount();
@@ -236,7 +254,13 @@ const Checkout = () => {
   const getItemDiscount = (item) => {
     const productId = item.product?._id;
     const coupon = appliedCoupons[productId];
-    return coupon?.discount || 0;
+    if (coupon) return coupon.discount || 0;
+    
+    // 10% Returning user discount applies if no specific coupon used
+    if (isReturningUser && Object.keys(appliedCoupons).length === 0) {
+       return ((item.product?.price || 0) * item.quantity * 10) / 100;
+    }
+    return 0;
   };
 
   const getItemFinalPrice = (item) => {
@@ -684,7 +708,7 @@ const Checkout = () => {
                   </div>
                   {calculateDiscount() > 0 && (
                     <div className="flex justify-between text-xs text-green-600">
-                      <span>Discount</span>
+                      <span>Discount {isReturningUser && Object.keys(appliedCoupons).length === 0 ? '(Returning User 10%)' : ''}</span>
                       <span>-Rs.{calculateDiscount().toFixed(2)}</span>
                     </div>
                   )}
@@ -694,7 +718,7 @@ const Checkout = () => {
                   </div>
                   {calculateShipping() === 0 && (
                     <div className="text-xs text-green-600">
-                      🎉 Free shipping on orders above Rs.2,500!
+                      🎉 Free shipping on orders above Rs.{FREE_SHIPPING_THRESHOLD}!
                     </div>
                   )}
                 

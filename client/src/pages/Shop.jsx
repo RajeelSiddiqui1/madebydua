@@ -11,13 +11,11 @@ const Shop = () => {
 
   useEffect(() => {
     const fetchCounts = async () => {
-      if (isAuthenticated) {
-        try {
-          const cartRes = await cartAPI.getCart();
-          setCartCount(cartRes.data?.products?.length || 0);
-        } catch (error) {
-          console.error('Error fetching counts:', error);
-        }
+      try {
+        const cartRes = await cartAPI.getCart();
+        setCartCount(cartRes.data?.products?.length || 0);
+      } catch (error) {
+        console.error('Error fetching counts:', error);
       }
     };
     fetchCounts();

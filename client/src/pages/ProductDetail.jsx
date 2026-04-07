@@ -75,10 +75,8 @@ const ProductDetailContent = () => {
   }, [id]);
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+    // Allow unauthenticated users to add to cart
+
     setCartLoading(true);
     try {
       await cartAPI.addToCart(product._id, 1);

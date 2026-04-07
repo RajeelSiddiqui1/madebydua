@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Pages
@@ -15,6 +15,7 @@ import AdminCategories from './pages/admin/AdminCategories';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminCoupons from './pages/admin/AdminCoupons';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminTestimonials from './pages/admin/AdminTestimonials';
 
 // User Pages
 import Shop from './pages/Shop';
@@ -27,13 +28,14 @@ import Profile from './pages/user/Profile';
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, isAuthenticated, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <div className="text-center py-8">Loading...</div>;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
@@ -87,22 +89,38 @@ function App() {
             <Route path="products" element={<AdminProducts />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="coupons" element={<AdminCoupons />} />
+            <Route path="testimonials" element={<AdminTestimonials />} />
           </Route>
 
           {/* User Routes */}
-          <Route
-            path="/shop"
-            element={
-              <UserRoute>
-                <Shop />
-              </UserRoute>
-            }
-          >
+          {/* Public Shop Routes */}
+          <Route path="/shop" element={<Shop />}>
             <Route index element={<UserDashboard />} />
-            <Route path="wishlist" element={<Wishlist />} />
             <Route path="cart" element={<Cart />} />
-            <Route path="checkout" element={<Checkout />} />
-            <Route path="profile" element={<Profile />} />
+            <Route 
+              path="checkout" 
+              element={
+                <UserRoute>
+                  <Checkout />
+                </UserRoute>
+              } 
+            />
+            <Route 
+              path="wishlist" 
+              element={
+                <UserRoute>
+                  <Wishlist />
+                </UserRoute>
+              } 
+            />
+            <Route 
+              path="profile" 
+              element={
+                <UserRoute>
+                  <Profile />
+                </UserRoute>
+              } 
+            />
           </Route>
 
           {/* User Profile Route - Direct access */}

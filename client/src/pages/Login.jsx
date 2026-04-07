@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,6 +12,9 @@ const Login = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || '/page/user';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +25,7 @@ const Login = () => {
       if (user.role === 'admin') {
         navigate('/page/admin');
       } else {
-        navigate('/page/user');
+        navigate(from);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
