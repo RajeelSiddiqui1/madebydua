@@ -102,7 +102,6 @@ const ForgotPassword = () => {
       {/* Top Bar */}
       <header className="w-full flex items-center justify-between px-6 lg:px-12 py-6 border-b border-border/50 bg-card shadow-sm">
         <Link to="/" className="text-2xl font-black tracking-tighter text-primary flex items-center gap-2" style={{ fontFamily: 'var(--font-serif)' }}>
-          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white text-lg">D</div>
           Handmade By Dua
         </Link>
         <Link to="/login" className="text-sm font-bold text-accent hover:opacity-80 transition-opacity">

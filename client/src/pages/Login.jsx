@@ -39,7 +39,7 @@ const Login = () => {
       {/* Top Bar */}
       <header className="flex items-center justify-between px-6 lg:px-12 py-5 border-b border-border">
         <Link to="/" className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-          NewDua
+          Handmade By Dua
         </Link>
         <p className="text-sm text-muted-foreground">
           Don't have an account?{' '}

@@ -14,6 +14,11 @@ const Footer = () => {
             <p className="text-sm text-white/80 leading-relaxed max-w-xs mx-auto sm:mx-0">
             Each piece is handmade with care to add warmth and beauty to your home
             </p>
+
+              <div className=" text-[12px] ">
+          <p>© {new Date().getFullYear()} Handmade By Dua. All rights reserved.</p>
+          
+        </div>
           </div>
 
           {/* Column 2: Quick Links */}
@@ -68,12 +73,23 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-white/40">
-          <p>© {new Date().getFullYear()} Handmade By Dua. All rights reserved.</p>
-          <div className="flex gap-6">
-              <Link to="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link to="#" className="hover:text-white transition-colors">Terms of Service</Link>
-          </div>
+      
+
+        <div className="mt-8 pt-6 border-t border-white/10 flex justify-center">
+          <a 
+            href="https://mhdigitaledge.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-white hover:text-white transition-colors"
+          >
+            <img 
+              src="/mh-edge-logo.png" 
+              alt="MH Digital Edge" 
+              className="h-6 w-auto opacity-70 hover:opacity-100 transition-opacity"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <span className="text-xs text-white ">Designed & Developed by MH Digital Edge</span>
+          </a>
         </div>
       </div>
     </footer>

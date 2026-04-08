@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, HandMetal, Leaf, HeartHandshake, ChevronRight } from 'lucide-react';
+import { HandMetal, Leaf, HeartHandshake, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { wishlistAPI } from '../services/api';
 
 const stats = [
   { value: '10+', label: 'Years of Craft' },
@@ -25,58 +28,36 @@ const process = [
 
 const About = () => {
   const { isAuthenticated } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await wishlistAPI.getAll();
+          setWishlistCount(response.data?.length || 0);
+        } catch (error) {
+          console.error('Error fetching wishlist count:', error);
+        }
+      }
+    };
+    fetchWishlistCount();
+  }, [isAuthenticated]);
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4">
-            <Link to="/" className="text-2xl font-bold tracking-tight shrink-0" style={{ fontFamily: 'var(--font-serif)' }}>
-              NewDua
-            </Link>
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
-              <div className="relative w-full">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search for handcrafted pieces..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder:text-muted-foreground"
-                />
-              </div>
-            </div>
-            <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
-              {[
-                { name: 'Home', path: '/' },
-                { name: 'Shop', path: '/page/user' },
-                { name: 'Collections', path: '/page/user' },
-                { name: 'About', path: '/about' }
-              ].map((item) => (
-                <Link key={item.name} to={item.path} className={item.name === 'About' ? 'text-accent' : 'hover:text-accent transition-colors'}>
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-            <div className="flex items-center gap-3">
-              {isAuthenticated ? (
-                <Link to="/page/user" className="px-4 py-1.5 text-sm font-medium rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
-                  My Account
-                </Link>
-              ) : (
-                <>
-                  <Link to="/login" className="px-4 py-1.5 text-sm font-medium rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity">Login</Link>
-                  <Link to="/register" className="px-4 py-1.5 text-sm font-medium rounded-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors hidden sm:block">Sign Up</Link>
-                </>
-              )}
-              <button className="p-2 hover:text-accent transition-colors"><Heart size={20} /></button>
-              <button className="p-2 hover:text-accent transition-colors"><ShoppingBag size={20} /></button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header 
+        cartCount={0} // This can be managed by a context or passed from App
+        wishlistCount={wishlistCount}
+        navLinks={[
+          { name: 'Home', path: '/' },
+          { name: 'Shop', path: '/shop' },
+          { name: 'Collections', path: '/shop' },
+          { name: 'About', path: '/about' }
+        ]}
+        showAuthButtons={true}
+        showSearch={true}
+      />
 
       {/* Hero */}
       <section className="bg-secondary py-16 lg:py-24 text-center">
@@ -107,7 +88,7 @@ const About = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                NewDua was founded with a simple vision: to bring the ancient art of pottery into modern homes. What started as a small studio has grown into a beloved brand, trusted by thousands of customers worldwide.
+                Handmade By Dua was founded with a simple vision: to bring the ancient art of pottery into modern homes. What started as a small studio has grown into a beloved brand, trusted by thousands of customers worldwide.
               </p>
               <p>
                 Every piece we create is a testament to the timeless beauty of handcrafted ceramics. We source the finest clay, use traditional techniques passed down through generations, and add our own contemporary flair.
@@ -162,8 +143,8 @@ const About = () => {
       </section>
 
       {/* Stats */}
-      <section className="bg-primary text-primary-foreground py-14">
-        <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <section className="bg-primary text-white py-14">
+        <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
           {stats.map((s) => (
             <div key={s.label}>
               <p className="text-3xl lg:text-4xl font-bold mb-1" style={{ fontFamily: 'var(--font-serif)' }}>{s.value}</p>
@@ -184,14 +165,14 @@ const About = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              to="/page/user"
+              to="/shop"
               className="inline-flex items-center gap-2 px-8 py-3 bg-accent text-accent-foreground rounded-full text-sm font-medium hover:opacity-90 transition-opacity"
             >
               Shop Collection
               <ChevronRight size={16} />
             </Link>
             <Link
-              to="/about"
+              to="https://wa.me/923133992762"
               className="inline-flex items-center gap-2 px-8 py-3 border border-border rounded-full text-sm font-medium hover:bg-muted transition-colors text-foreground"
             >
               Contact Us
@@ -200,52 +181,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4" style={{ fontFamily: 'var(--font-serif)' }}>NewDua</h3>
-              <p className="text-sm opacity-70 leading-relaxed">
-                Discover our unique collection of handcrafted ceramics. Each piece is made with love and care.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm opacity-70">
-                {['Home', 'Shop', 'Collections', 'About Us'].map((l) => (
-                  <li key={l}><a href="#" className="hover:opacity-100 transition-opacity">{l}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Customer Service</h4>
-              <ul className="space-y-2 text-sm opacity-70">
-                {['Contact Us', 'Shipping Info', 'Returns & Exchanges', 'FAQ'].map((l) => (
-                  <li key={l}><a href="#" className="hover:opacity-100 transition-opacity">{l}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Newsletter</h4>
-              <p className="text-sm opacity-70 mb-3">Subscribe for updates and exclusive offers.</p>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="flex-1 px-3 py-2 rounded-l-lg text-sm bg-primary-foreground/10 border border-primary-foreground/20 placeholder:text-primary-foreground/50 focus:outline-none"
-                />
-                <button className="px-4 py-2 bg-accent text-accent-foreground rounded-r-lg text-sm font-medium hover:opacity-90 transition-opacity">
-                  Subscribe
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-primary-foreground/20 mt-10 pt-6 text-center text-xs opacity-50">
-            © 2024 NewDua. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
