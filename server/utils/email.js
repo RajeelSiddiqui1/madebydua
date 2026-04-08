@@ -125,3 +125,33 @@ export const sendStatusUpdateNotification = async (order, user) => {
     console.error('❌ Error sending status update notification:', error);
   }
 };
+
+export const sendPasswordResetOtp = async (userEmail, otp) => {
+  try {
+    const emailContent = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #d97706; text-align: center;">Password Reset Verification</h2>
+        <p>Hello,</p>
+        <p>You have requested to reset your password. Here is your One-Time Password (OTP):</p>
+        <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+          <h1 style="font-size: 32px; letter-spacing: 5px; color: #333; margin: 0;">${otp}</h1>
+        </div>
+        <p style="color: #ef4444; font-size: 14px;">This OTP is valid for 10 minutes. Do not share this code with anyone.</p>
+        <p>If you did not request a password reset, please ignore this email or contact support.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua</p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"Handmade By Dua" <${process.env.EMAIL}>`,
+      to: userEmail,
+      subject: `Your Password Reset OTP - Handmade By Dua`,
+      html: emailContent,
+    });
+
+    console.log(`✅ Password reset OTP sent to ${userEmail}`);
+  } catch (error) {
+    console.error('❌ Error sending password reset OTP:', error);
+  }
+};

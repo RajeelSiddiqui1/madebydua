@@ -8,6 +8,7 @@ const AdminTestimonials = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', reviewText: '', rating: 5, active: true });
   const [editingId, setEditingId] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const fetchTestimonials = async () => {
     try {
@@ -27,12 +28,22 @@ const AdminTestimonials = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('reviewText', formData.reviewText);
+      data.append('rating', formData.rating);
+      data.append('active', formData.active);
+      if (selectedFile) {
+        data.append('image', selectedFile);
+      }
+
       if (editingId) {
-        await testimonialAPI.update(editingId, formData);
+        await testimonialAPI.update(editingId, data);
       } else {
-        await testimonialAPI.create(formData);
+        await testimonialAPI.create(data);
       }
       setIsModalOpen(false);
+      setSelectedFile(null);
       fetchTestimonials();
     } catch (error) {
       console.error('Error saving testimonial:', error);
@@ -52,12 +63,18 @@ const AdminTestimonials = () => {
 
   const openModal = (testimonial = null) => {
     if (testimonial) {
-      setFormData(testimonial);
+      setFormData({
+        name: testimonial.name,
+        reviewText: testimonial.reviewText,
+        rating: testimonial.rating,
+        active: testimonial.active
+      });
       setEditingId(testimonial._id);
     } else {
       setFormData({ name: '', reviewText: '', rating: 5, active: true });
       setEditingId(null);
     }
+    setSelectedFile(null);
     setIsModalOpen(true);
   };
 
@@ -79,6 +96,7 @@ const AdminTestimonials = () => {
         <table className="min-w-full divide-y divide-border">
           <thead className="bg-secondary/50">
             <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Image</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Review</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Rating</th>
@@ -89,6 +107,19 @@ const AdminTestimonials = () => {
           <tbody className="bg-background divide-y divide-border">
             {testimonials.map((test) => (
               <tr key={test._id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                   {test.image ? (
+                     <img 
+                       src={`${import.meta.env.VITE_BACKEND_URL?.replace('/api', '/uploads/testimonial')}/${test.image}`} 
+                       alt={test.name} 
+                       className="w-10 h-10 rounded-full object-cover"
+                     />
+                   ) : (
+                     <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">
+                       <Plus size={16} />
+                     </div>
+                   )}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap font-medium">{test.name}</td>
                 <td className="px-6 py-4 max-w-xs truncate">{test.reviewText}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -125,6 +156,15 @@ const AdminTestimonials = () => {
               <button onClick={() => setIsModalOpen(false)}><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">User Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Customer Name</label>
                 <input

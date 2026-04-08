@@ -68,14 +68,12 @@ const Header = ({
     <header className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
       {/* Free Shipping Banner */}
       <div className="bg-accent text-accent-foreground text-center py-1 text-xs font-medium">
-        🚚 Free shipping on orders above Rs.3499
+        🚚 Enjoy FREE shipping on prepaid orders above Rs. 3,499
       </div>
       
       {/* Mobile Header */}
       <div className="lg:hidden max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group transition-all duration-300" style={{ fontFamily: 'var(--font-serif)' }}>
-           <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/90 bg-clip-text text-transparent">Handmade By Dua</span>
-        </Link>
+        
         
         {/* Breadcrumb - Right */}
         {showBreadcrumb && (

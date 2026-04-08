@@ -41,6 +41,9 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  resendOtp: (data) => api.post('/auth/resend-otp', data),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
 };
 
 // Category APIs
@@ -117,9 +120,22 @@ export const orderAPI = {
 // Testimonial APIs
 export const testimonialAPI = {
   getAll: () => api.get('/testimonial'),
-  create: (data) => api.post('/testimonial', data),
-  update: (id, data) => api.put(`/testimonial/${id}`, data),
+  create: (formData) => api.post('/testimonial', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, formData) => api.put(`/testimonial/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   delete: (id) => api.delete(`/testimonial/${id}`),
+};
+
+// Settings APIs
+export const settingsAPI = {
+  get: () => api.get('/settings'),
+  update: (data) => api.put('/settings', data),
+  uploadHero: (formData) => api.post('/settings/hero', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 
 // Admin APIs

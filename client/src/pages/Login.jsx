@@ -137,7 +137,7 @@ const Login = () => {
                   />
                   Remember me
                 </label>
-                {/* <a href="#" className="text-sm text-accent hover:underline">Forgot password?</a> */}
+                <Link to="/forgot-password" className="text-sm text-accent hover:underline">Forgot password?</Link>
               </div>
 
               <button

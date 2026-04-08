@@ -337,52 +337,7 @@ const Checkout = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Shipping Details */}
             <div className="lg:col-span-2 space-y-4">
-              {/* Customization & COD Info */}
-              <div className="bg-accent/5 border border-accent/20 rounded-lg p-5 space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-lg text-accent" style={{ fontFamily: 'var(--font-serif)' }}>
-                      Color Customization & Queries
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      For any custom colors or queries, feel free to chat with us.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <a 
-                      href="https://wa.me/923133992762" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
-                    >
-                      <MessageSquare size={16} />
-                      WhatsApp
-                    </a>
-                    <a 
-                      href="https://instagram.com/handmade.by.dua" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
-                    >
-                      <Instagram size={16} />
-                      Instagram
-                    </a>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-accent/10">
-                  <h3 className="font-semibold text-sm mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
-                    Cash on Delivery (COD) Orders
-                  </h3>
-                  <div className="flex items-start gap-3 bg-white/50 p-3 rounded-lg border border-accent/10">
-                    <CheckCircle size={18} className="text-accent shrink-0 mt-0.5" />
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      For <span className="font-bold text-foreground">Cash on Delivery</span>, please place your order directly via Instagram or WhatsApp chat. 
-                      A small advance payment (including delivery charges) is required to confirm COD orders.
-                    </p>
-                  </div>
-                </div>
-              </div>
+            
 
               <div className="bg-card rounded-lg border border-border p-4">
                 <h2 className="text-lg font-semibold mb-3" style={{ fontFamily: 'var(--font-serif)' }}>Shipping Address</h2>
@@ -658,6 +613,53 @@ const Checkout = () => {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+
+                {/* Customization & COD Info */}
+              <div className="bg-accent/5 border border-accent/20 rounded-lg p-5 space-y-4">
+                {/* <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-lg text-accent" style={{ fontFamily: 'var(--font-serif)' }}>
+                      Color Customization & Queries
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      For any custom colors or queries, feel free to chat with us.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <a 
+                      href="https://wa.me/923133992762" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+                    >
+                      <MessageSquare size={16} />
+                      WhatsApp
+                    </a>
+                    <a 
+                      href="https://instagram.com/handmade.by.dua" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+                    >
+                      <Instagram size={16} />
+                      Instagram
+                    </a>
+                  </div>
+                </div> */}
+
+                <div className="pt-4 border-t border-accent/10">
+                  <h3 className="font-semibold text-sm mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
+                    Cash on Delivery (COD) Orders
+                  </h3>
+                  <div className="flex items-start gap-3 bg-white/50 p-3 rounded-lg border border-accent/10">
+                    <CheckCircle size={18} className="text-accent shrink-0 mt-0.5" />
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      For <span className="font-bold text-foreground">Cash on Delivery</span>, please place your order directly via Instagram or WhatsApp chat. 
+                      A small advance payment (including delivery charges) is required to confirm COD orders.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

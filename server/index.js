@@ -12,6 +12,7 @@ import wishListRoute from "./routes/wishListRoutes.js"
 import cartRoute from "./routes/cartRoutes.js"
 import orderRoute from "./routes/orderRoutes.js"
 import testimonialRoute from "./routes/testimonialRoutes.js"
+import settingsRoute from "./routes/settingsRoutes.js"
 import dbConnect from "./lib/db.js"
 
 dotenv.config()
@@ -69,6 +70,7 @@ app.use("/api/wishlist", wishListRoute)
 app.use("/api/cart", cartRoute)
 app.use("/api/order", orderRoute)
 app.use("/api/testimonial", testimonialRoute)
+app.use("/api/settings", settingsRoute)
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

@@ -17,7 +17,8 @@ export const getTestimonials = async (req, res) => {
 export const createTestimonial = async (req, res) => {
   try {
     const { name, reviewText, rating, active } = req.body;
-    const testimonial = await Testimonial.create({ name, reviewText, rating, active });
+    const image = req.file ? req.file.filename : null;
+    const testimonial = await Testimonial.create({ name, reviewText, rating, active, image });
     res.status(201).json(testimonial);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -36,6 +37,10 @@ export const updateTestimonial = async (req, res) => {
       testimonial.reviewText = reviewText || testimonial.reviewText;
       testimonial.rating = rating !== undefined ? rating : testimonial.rating;
       testimonial.active = active !== undefined ? active : testimonial.active;
+      
+      if (req.file) {
+        testimonial.image = req.file.filename;
+      }
       
       const updatedTestimonial = await testimonial.save();
       res.json(updatedTestimonial);

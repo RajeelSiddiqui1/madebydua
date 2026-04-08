@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Truck, Shield, RotateCcw, Heart, Image, Building2, Package, Star } from 'lucide-react';
-import { productAPI, categoryAPI, testimonialAPI } from '../services/api';
+import { ChevronRight, Truck, Shield, RotateCcw, Heart, Image, Building2, Package, Star, MessageSquare, Instagram, CheckCircle } from 'lucide-react';
+import { productAPI, categoryAPI, testimonialAPI, settingsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -18,6 +18,7 @@ const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [currentReview, setCurrentReview] = useState(0);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
@@ -26,16 +27,18 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, featuredRes, categoriesRes, testimonialsRes] = await Promise.all([
+        const [productsRes, featuredRes, categoriesRes, testimonialsRes, settingsRes] = await Promise.all([
           productAPI.getAll(),
           productAPI.getFeatured(),
           categoryAPI.getAll(),
-          testimonialAPI.getAll()
+          testimonialAPI.getAll(),
+          settingsAPI.get()
         ]);
         setProducts(productsRes.data?.filter(p => p.active !== false) || []);
         setFeaturedProducts(featuredRes.data?.filter(p => p.active !== false) || []);
         setCategories(categoriesRes.data || []);
         setTestimonials(testimonialsRes.data || []);
+        setSettings(settingsRes.data || null);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -282,47 +285,129 @@ const Home = () => {
         )}
       </section>
 
-      {/* ── Features ── */}
-      <section className="bg-secondary/50 py-12">
+      {/* ── Brand Promises & Customization ── */}
+      <section className="py-24 bg-gradient-to-b from-background to-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
-                <Shield size={24} />
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <p className="text-accent text-sm font-bold uppercase tracking-[0.2em] mb-4">The Dua Standards</p>
+            <h2 className="text-4xl sm:text-5xl font-light mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
+              Why Shop With <span className="text-accent italic">Dua</span>
+            </h2>
+            <div className="w-24 h-1 bg-accent/30 mx-auto rounded-full"></div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
+            {[
+              { icon: <Star size={32} />, title: "Repeated Customer", desc: "Loyalty pays! Get 10% off on your next direct purchase." },
+              { icon: <Shield size={32} />, title: "Careful Packaging", desc: "Each item is securely double-wrapped for a safe journey." },
+              { icon: <Package size={32} />, title: "Prepaid Order", desc: "Spend Rs. 3499 or more and enjoy complimentary shipping." },
+              { icon: <Truck size={32} />, title: "Nationwide Delivery", desc: "Reliable distribution to every corner of Pakistan." }
+            ].map((feature, i) => (
+              <div key={i} className="group relative bg-background/50 backdrop-blur-sm p-10 rounded-[2.5rem] border border-border shadow-soft hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 overflow-hidden text-center">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full transition-transform group-hover:scale-125"></div>
+                <div className="w-16 h-16 bg-accent text-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-accent/20 group-hover:rotate-12 transition-transform duration-500">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: 'var(--font-serif)' }}>{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
               </div>
-              <div>
-                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Repeated Customer</h3>
-                <p className="text-sm text-muted-foreground mt-1">10% off on your next purchase</p>
-              </div>
+            ))}
+          </div>
+
+          {/* Customization & COD Banner */}
+         <div className="group rounded-[3rem] lg:rounded-[5rem] overflow-hidden border border-accent/20 shadow-2xl relative transition-all duration-700 hover:shadow-accent/10">
+  {/* Background Effects: Soft Gradient for Depth */}
+  <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-accent/5 backdrop-blur-3xl"></div>
+  <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
+  
+  <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-accent/10">
+    
+    {/* Left Side: Messaging & Hook */}
+    <div className="p-8 sm:p-16 lg:p-20">
+      <div className="flex flex-col h-full justify-center max-w-lg">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-8 w-fit border border-accent/20">
+          <Star size={12} fill="currentColor" className="animate-pulse" />
+          Bespoke Experience
+        </div>
+        
+        <h3 className="text-4xl lg:text-5xl font-medium mb-6 leading-[1.1] tracking-tight text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
+          Tailored to your <span className="italic text-accent">unique</span> taste.
+        </h3>
+        
+        <p className="text-muted-foreground text-lg mb-10 leading-relaxed opacity-90">
+          From specific color palettes to matching your home decor—if you can imagine it, we can craft it. Let’s collaborate on your next favorite piece.
+        </p>
+
+        {/* Added: Quick Trust Badges */}
+        <div className="flex items-center gap-6 text-sm font-medium text-foreground/70">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+            Custom Colors
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
+            Fast Response
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Right Side: Interactive Connect Cards */}
+    <div className="p-8 sm:p-16 lg:p-20 bg-accent/[0.03] flex flex-col justify-center">
+      <div className="mb-10">
+        <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-2">Connect with Dua</h4>
+        <p className="text-sm text-muted-foreground/60">Choose your preferred way to chat with us.</p>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {/* WhatsApp Card */}
+        <a 
+          href="https://wa.me/923133992762" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="group/btn flex items-center justify-between p-6 bg-white dark:bg-white/5 border border-green-500/20 rounded-3xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-green-500/10"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-[#25D366]/10 text-[#25D366] rounded-2xl group-hover/btn:scale-110 transition-transform">
+              <MessageSquare size={24} />
             </div>
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
-                <Heart size={24} />
-              </div>
-              <div>
-                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Careful Packaging</h3>
-                <p className="text-sm text-muted-foreground mt-1">Securely packed for safe arrival</p>
-              </div>
-            </div>
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
-                <Package size={24} />
-              </div>
-              <div>
-                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Prepaid Order</h3>
-                <p className="text-sm text-muted-foreground mt-1">Enjoy free shopping on order above 3499</p>
-              </div>
-            </div>
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
-                <Truck size={24} />
-              </div>
-              <div>
-                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Nationwide Delivery</h3>
-                <p className="text-sm text-muted-foreground mt-1">Delivery available across Pakistan</p>
-              </div>
+            <div className="text-left">
+              <p className="font-bold text-lg">WhatsApp Us</p>
+              <p className="text-xs text-muted-foreground italic">Instant replies & customization</p>
             </div>
           </div>
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-green-500 text-white shadow-lg">
+            →
+          </div>
+        </a>
+
+        {/* Instagram Card */}
+        <a 
+          href="https://instagram.com/handmade.by.dua" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="group/btn flex items-center justify-between p-6 bg-white dark:bg-white/5 border border-pink-500/20 rounded-3xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-pink-500/10"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-2xl group-hover/btn:scale-110 transition-transform">
+              <Instagram size={24} />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-lg">Follow Gallery</p>
+              <p className="text-xs text-muted-foreground italic">Daily updates & inspiration</p>
+            </div>
+          </div>
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gradient-to-tr from-[#DD2A7B] to-[#8134AF] text-white shadow-lg">
+            →
+          </div>
+        </a>
+      </div>
+    </div>
+    
+  </div>
+</div>
         </div>
       </section>
 
@@ -341,25 +426,34 @@ const Home = () => {
                    className="flex transition-transform duration-700 ease-in-out" 
                    style={{ transform: `translateX(-${currentReview * 100}%)` }}
                  >
-                   {testimonials.map((testimonial) => (
-                     <div key={testimonial._id} className="w-full flex-shrink-0 px-4">
-                       <div className="bg-background/50 backdrop-blur-sm p-10 rounded-3xl border border-border shadow-soft text-center h-full flex flex-col justify-center items-center">
-                         <div className="text-accent mb-6 flex gap-1 justify-center">
-                           {[...Array(5)].map((_, i) => (
-                             <Star key={i} size={20} fill={i < testimonial.rating ? "currentColor" : "none"} stroke={i < testimonial.rating ? "currentColor" : "gray"} />
-                           ))}
-                         </div>
-                         <p className="text-lg lg:text-xl text-foreground font-medium leading-relaxed italic mb-8 max-w-2xl">
-                           "{testimonial.reviewText}"
-                         </p>
-                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-[1px] bg-accent/30"></div>
-                            <h4 className="font-bold text-sm tracking-widest uppercase">{testimonial.name}</h4>
-                            <div className="w-10 h-[1px] bg-accent/30"></div>
-                         </div>
-                       </div>
-                     </div>
-                   ))}
+                    {testimonials.map((testimonial) => (
+                      <div key={testimonial._id} className="w-full flex-shrink-0 px-4">
+                        <div className="bg-background/50 backdrop-blur-sm p-10 rounded-3xl border border-border shadow-soft text-center h-full flex flex-col justify-center items-center">
+                          {testimonial.image && (
+                            <div className="mb-6">
+                              <img 
+                                src={`${import.meta.env.VITE_BACKEND_URL?.replace('/api', '/uploads/testimonial')}/${testimonial.image}`} 
+                                alt={testimonial.name}
+                                className="w-20 h-20 rounded-full object-cover border-2 border-accent/20 p-1 bg-background"
+                              />
+                            </div>
+                          )}
+                          <div className="text-accent mb-6 flex gap-1 justify-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={20} fill={i < testimonial.rating ? "currentColor" : "none"} stroke={i < testimonial.rating ? "currentColor" : "gray"} />
+                            ))}
+                          </div>
+                          <p className="text-lg lg:text-xl text-foreground font-medium leading-relaxed italic mb-8 max-w-2xl">
+                            "{testimonial.reviewText}"
+                          </p>
+                          <div className="flex items-center gap-3">
+                             <div className="w-10 h-[1px] bg-accent/30"></div>
+                             <h4 className="font-bold text-sm tracking-widest uppercase">{testimonial.name}</h4>
+                             <div className="w-10 h-[1px] bg-accent/30"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                  </div>
               </div>
               

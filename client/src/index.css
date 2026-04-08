@@ -3,33 +3,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;500;700&display=swap');
 
 @theme {
-  --color-background: hsl(30 33% 96%);
-  --color-foreground: hsl(20 20% 20%);
+  --color-background: hsl(40 20% 99%);
+  --color-foreground: hsl(30 15% 15%);
   
-  --color-card: hsl(30 25% 97%);
-  --color-card-foreground: hsl(20 20% 20%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(30 15% 15%);
   
-  --color-popover: hsl(30 25% 97%);
-  --color-popover-foreground: hsl(20 20% 20%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(30 15% 15%);
   
-  --color-primary: hsl(20 40% 35%);
-  --color-primary-foreground: hsl(30 33% 96%);
+  --color-primary: hsl(38 60% 53%);
+  --color-primary-foreground: hsl(40 20% 99%);
   
-  --color-secondary: hsl(25 30% 90%);
-  --color-secondary-foreground: hsl(20 20% 20%);
+  --color-secondary: hsl(38 30% 95%);
+  --color-secondary-foreground: hsl(38 60% 30%);
   
-  --color-muted: hsl(25 20% 92%);
-  --color-muted-foreground: hsl(20 10% 50%);
+  --color-muted: hsl(40 10% 96%);
+  --color-muted-foreground: hsl(30 5% 45%);
   
-  --color-accent: hsl(20 60% 55%);
-  --color-accent-foreground: hsl(30 33% 96%);
+  --color-accent: hsl(38 60% 53%);
+  --color-accent-foreground: hsl(40 20% 99%);
   
   --color-destructive: hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(210 40% 98%);
   
-  --color-border: hsl(25 20% 88%);
-  --color-input: hsl(25 20% 88%);
-  --color-ring: hsl(20 40% 35%);
+  --color-border: hsl(40 15% 90%);
+  --color-input: hsl(40 15% 90%);
+  --color-ring: hsl(38 60% 53%);
   
   --radius-sm: calc(0.5rem - 4px);
   --radius-md: calc(0.5rem - 2px);
@@ -39,11 +39,11 @@
 
 @layer base {
   :root {
-    --background: hsl(30 33% 96%);
-    --foreground: hsl(20 20% 20%);
-    --border: hsl(25 20% 88%);
-    --accent: hsl(20 60% 55%);
-    --accent-foreground: hsl(30 33% 96%);
+    --background: hsl(40 20% 99%);
+    --foreground: hsl(30 15% 15%);
+    --border: hsl(40 15% 90%);
+    --accent: hsl(38 60% 53%);
+    --accent-foreground: hsl(40 20% 99%);
     --font-sans: 'Lato', system-ui, sans-serif;
     --font-serif: 'Playfair Display', Georgia, serif;
   }

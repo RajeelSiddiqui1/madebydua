@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import ProductDetail from './pages/ProductDetail';
 
 // Admin Pages
@@ -16,6 +17,7 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminCoupons from './pages/admin/AdminCoupons';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
+import AdminSettings from './pages/admin/AdminSettings';
 
 // User Pages
 import Shop from './pages/Shop';
@@ -73,6 +75,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/product/:id" element={<ProductDetail />} />
 
           {/* Admin Routes */}
@@ -90,6 +93,7 @@ function App() {
             <Route path="orders" element={<AdminOrders />} />
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="testimonials" element={<AdminTestimonials />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* User Routes */}

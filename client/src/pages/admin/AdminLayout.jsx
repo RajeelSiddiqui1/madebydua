@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut, Receipt, MessageSquare } from 'lucide-react';
+import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut, Receipt, MessageSquare, Settings } from 'lucide-react';
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -20,6 +20,7 @@ const AdminLayout = () => {
     { path: '/page/admin/orders', label: 'Orders', icon: Receipt },
     { path: '/page/admin/coupons', label: 'Coupons', icon: Tag },
     { path: '/page/admin/testimonials', label: 'Reviews', icon: MessageSquare },
+    // { path: '/page/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
