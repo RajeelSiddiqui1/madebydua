@@ -12,7 +12,7 @@ services:
     networks:
       - madebydua
     volumes:
-      - mongo-data:/data/db
+      -  madebydua_mongo-data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "-u", "admin", "-p", "123456", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -55,6 +55,11 @@ services:
 networks:
   madebydua:
     driver: bridge
+
+volumes:
+  madebydua_mongo-data:
+   driver: local
+    
 
 volumes:
   mongo-data:
