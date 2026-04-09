@@ -41,7 +41,7 @@ const AdminDashboard = () => {
         setRecentOrders(orders.slice(0, 5));
       } catch (error) {
         console.error('Error fetching stats:', error);
-      } finally {
+      } finally { 
         setLoading(false);
       }
     };
@@ -70,9 +70,9 @@ const AdminDashboard = () => {
   const cards = [
     { title: 'Products', count: stats.products, color: 'bg-gradient-to-br from-blue-500 to-blue-600', icon: Package, path: '/page/admin/products' },
     { title: 'Categories', count: stats.categories, color: 'bg-gradient-to-br from-green-500 to-green-600', icon: Tag, path: '/page/admin/categories' },
-    { title: 'Users', count: stats.users, color: 'bg-gradient-to-br from-purple-500 to-purple-600', icon: Users, path: '/page/admin' },
+    { title: 'Users', count: stats.users, color: 'bg-gradient-to-br from-purple-500 to-purple-600', icon: Users, path: '/page/admin/users' },
     { title: 'Orders', count: stats.orders, color: 'bg-gradient-to-br from-orange-500 to-orange-600', icon: ShoppingBag, path: '/page/admin/orders' },
-    { title: 'Revenue', count: `Rs.${stats.totalRevenue.toLocaleString()}`, color: 'bg-gradient-to-br from-emerald-500 to-emerald-600', icon: DollarSign, path: '/page/admin' },
+    { title: 'Revenue', count: `Rs.${Math.round(stats.totalRevenue).toLocaleString()}`, color: 'bg-gradient-to-br from-emerald-500 to-emerald-600', icon: DollarSign, path: '/page/admin' },
     { title: 'Coupons', count: stats.coupons, color: 'bg-gradient-to-br from-pink-500 to-pink-600', icon: Tag, path: '/page/admin/coupons' },
   ];
 
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
                     <td className="px-3 py-2 text-xs font-mono text-gray-600">{order._id?.slice(-8)}</td>
                     <td className="px-3 py-2 text-xs">{order.user?.firstName || 'Unknown'} {order.user?.lastName || ''}</td>
                     <td className="px-3 py-2 text-xs">{order.products?.length || 0} items</td>
-                    <td className="px-3 py-2 text-xs font-medium">Rs.{order.totalAmount?.toFixed(2)}</td>
+                    <td className="px-3 py-2 text-xs font-medium">Rs.{Math.round(order.totalAmount).toLocaleString()}</td>
                     <td className="px-3 py-2">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                         {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
@@ -193,7 +193,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-500">{order.products?.length || 0} items</span>
-                  <span className="text-sm font-bold">Rs.{order.totalAmount?.toFixed(2)}</span>
+                  <span className="text-sm font-bold">Rs.{Math.round(order.totalAmount).toLocaleString()}</span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
               </div>

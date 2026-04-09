@@ -166,7 +166,7 @@ const Home = () => {
         {displayCategories.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {displayCategories.map((cat, idx) => (
-               <Link key={cat._id || idx} to={`/shop?category=${cat._id || cat.name}`} className="group relative rounded-xl overflow-hidden aspect-square">
+               <Link key={cat._id || idx} to={`/shop?category=${cat._id || cat.name}`} className="group relative rounded-xl overflow-hidden aspect-square shadow-lg hover:shadow-2xl transition-all duration-500">
                 <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-foreground/30 group-hover:bg-foreground/40 transition-colors" />
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -194,7 +194,7 @@ const Home = () => {
           {displayFeatured.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
               {displayFeatured.map((product, idx) => (
-                <Link key={product._id || idx} to={`/product/${product._id || product.name}`} className="group block">
+                <Link key={product._id || idx} to={`/product/${product._id || product.name}`} className="group block bg-background p-3 rounded-2xl shadow-md hover:shadow-xl transition-all duration-500">
                   <div className="relative rounded-xl overflow-hidden aspect-[4/3] sm:aspect-square bg-muted mb-3">
                     <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     {product.isNew && (
@@ -247,7 +247,7 @@ const Home = () => {
         {displayNewArrivals.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
             {displayNewArrivals.map((product, idx) => (
-              <Link key={product._id || idx} to={`/product/${product._id || product.name}`} className="group block">
+              <Link key={product._id || idx} to={`/product/${product._id || product.name}`} className="group block bg-background p-3 rounded-2xl shadow-md hover:shadow-xl transition-all duration-500">
                 <div className="relative rounded-xl overflow-hidden aspect-[4/3] sm:aspect-square bg-muted mb-3">
                   <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   {/* Discount Badge */}
@@ -363,12 +363,12 @@ const Home = () => {
 
       <div className="flex flex-col gap-4">
         {/* WhatsApp Card */}
-        <a 
-          href="https://wa.me/923133992762" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="group/btn flex items-center justify-between p-6 bg-white dark:bg-white/5 border border-green-500/20 rounded-3xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-green-500/10"
-        >
+          <a 
+            href="https://wa.me/923133992762" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group/btn flex items-center justify-between p-6 bg-background dark:bg-white/5 border border-green-500/20 rounded-3xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-green-500/10"
+          >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-[#25D366]/10 text-[#25D366] rounded-2xl group-hover/btn:scale-110 transition-transform">
               <MessageSquare size={24} />
@@ -384,12 +384,12 @@ const Home = () => {
         </a>
 
         {/* Instagram Card */}
-        <a 
-          href="https://instagram.com/handmade.by.dua" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="group/btn flex items-center justify-between p-6 bg-white dark:bg-white/5 border border-pink-500/20 rounded-3xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-pink-500/10"
-        >
+          <a 
+            href="https://instagram.com/handmade.by.dua" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group/btn flex items-center justify-between p-6 bg-background dark:bg-white/5 border border-pink-500/20 rounded-3xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-pink-500/10"
+          >
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-2xl group-hover/btn:scale-110 transition-transform">
               <Instagram size={24} />

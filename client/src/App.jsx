@@ -18,6 +18,7 @@ import AdminCoupons from './pages/admin/AdminCoupons';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminUsers from './pages/admin/AdminUsers';
 
 // User Pages
 import Shop from './pages/Shop';
@@ -94,6 +95,7 @@ function App() {
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="testimonials" element={<AdminTestimonials />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="users" element={<AdminUsers />} />
           </Route>
 
           {/* User Routes */}

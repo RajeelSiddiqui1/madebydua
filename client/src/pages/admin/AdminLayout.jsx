@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut, Receipt, MessageSquare, Settings } from 'lucide-react';
+import { Menu, X, Package, Tag, Home, ShoppingBag, LogOut, Receipt, MessageSquare, Settings, Users } from 'lucide-react';
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -18,13 +18,14 @@ const AdminLayout = () => {
     { path: '/page/admin/categories', label: 'Categories', icon: Tag },
     { path: '/page/admin/products', label: 'Products', icon: Package },
     { path: '/page/admin/orders', label: 'Orders', icon: Receipt },
+    { path: '/page/admin/users', label: 'Users', icon: Users },
     { path: '/page/admin/coupons', label: 'Coupons', icon: Tag },
     { path: '/page/admin/testimonials', label: 'Reviews', icon: MessageSquare },
     // { path: '/page/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fcfcfc]">
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">Admin Panel</h1>

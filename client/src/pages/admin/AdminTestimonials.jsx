@@ -86,15 +86,15 @@ const AdminTestimonials = () => {
         <h1 className="text-3xl font-bold">Reviews & Testimonials</h1>
         <button
           onClick={() => openModal()}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
         >
           <Plus size={20} /> Add Review
         </button>
       </div>
 
-      <div className="bg-card rounded-lg border border-border overflow-hidden">
+      <div className="bg-white rounded-lg border border-border overflow-hidden shadow-sm">
         <table className="min-w-full divide-y divide-border">
-          <thead className="bg-secondary/50">
+          <thead className="bg-white">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Image</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Name</th>
@@ -104,7 +104,7 @@ const AdminTestimonials = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-background divide-y divide-border">
+          <tbody className="bg-white divide-y divide-border">
             {testimonials.map((test) => (
               <tr key={test._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -115,7 +115,7 @@ const AdminTestimonials = () => {
                        className="w-10 h-10 rounded-full object-cover"
                      />
                    ) : (
-                     <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">
+                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-muted-foreground">
                        <Plus size={16} />
                      </div>
                    )}
@@ -150,7 +150,7 @@ const AdminTestimonials = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-xl p-6 w-full max-w-md">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">{editingId ? 'Edit Review' : 'Add Review'}</h2>
               <button onClick={() => setIsModalOpen(false)}><X size={24} /></button>

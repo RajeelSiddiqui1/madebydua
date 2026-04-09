@@ -7,6 +7,7 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const fetchOrders = async () => {
     try {
@@ -93,8 +94,23 @@ const AdminOrders = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">Orders</h1>
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Filter by Status:</label>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
+          >
+            <option value="all">All Orders</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-x-auto">
@@ -133,12 +149,14 @@ const AdminOrders = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                <td colSpan="9" className="px-6 py-8 text-center text-gray-500">
                   No orders found
                 </td>
               </tr>
             ) : (
-              orders.map((order) => (
+              orders
+                .filter(order => statusFilter === 'all' || order.status === statusFilter)
+                .map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="font-mono text-sm text-gray-600">
@@ -161,11 +179,11 @@ const AdminOrders = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="font-medium">Rs.{order.totalAmount?.toFixed(2)}</span>
+                    <span className="font-medium">Rs.{Math.round(order.totalAmount).toLocaleString()}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {order.discountAmount > 0 ? (
-                      <span className="text-green-600">-Rs.{order.discountAmount?.toFixed(2)}</span>
+                      <span className="text-green-600">-Rs.{Math.round(order.discountAmount).toLocaleString()}</span>
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
@@ -310,7 +328,7 @@ const AdminOrders = () => {
                         <td className="px-4 py-3 text-sm">Rs.{item.product?.price}</td>
                         <td className="px-4 py-3 text-sm">{item.quantity}</td>
                         <td className="px-4 py-3 text-sm font-medium">
-                          Rs.{((item.product?.price || 0) * item.quantity).toFixed(2)}
+                          Rs.{Math.round((item.product?.price || 0) * item.quantity).toLocaleString()}
                         </td>
                       </tr>
                     ))}
@@ -332,7 +350,7 @@ const AdminOrders = () => {
                       <span className="font-mono bg-green-100 px-2 py-1 rounded">
                         {coupon.code || 'Coupon'}
                       </span>
-                      <span className="text-green-600">-Rs.{coupon.discount?.toFixed(2)}</span>
+                      <span className="text-green-600">-Rs.{Math.round(coupon.discount).toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
@@ -343,17 +361,17 @@ const AdminOrders = () => {
             <div className="border-t pt-4">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-500">Subtotal</span>
-                <span>Rs.{((selectedOrder.totalAmount || 0) + (selectedOrder.discountAmount || 0)).toFixed(2)}</span>
+                <span>Rs.{Math.round((selectedOrder.totalAmount || 0) + (selectedOrder.discountAmount || 0)).toLocaleString()}</span>
               </div>
               {selectedOrder.discountAmount > 0 && (
                 <div className="flex justify-between text-sm mb-2 text-green-600">
                   <span>Discount</span>
-                  <span>-Rs.{selectedOrder.discountAmount.toFixed(2)}</span>
+                  <span>-Rs.{Math.round(selectedOrder.discountAmount).toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>Rs.{selectedOrder.totalAmount?.toFixed(2)}</span>
+                <span>Rs.{Math.round(selectedOrder.totalAmount).toLocaleString()}</span>
               </div>
             </div>
 
