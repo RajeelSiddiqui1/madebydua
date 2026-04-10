@@ -5,17 +5,30 @@ import {
   getTestimonials,
   createTestimonial,
   updateTestimonial,
-  deleteTestimonial
+  deleteTestimonial,
+  getUserTestimonials,
+  toggleTestimonialStatus
 } from "../controller/testimonialController.js";
 
 const router = express.Router();
 
 router.route("/")
   .get(optionalAuth, getTestimonials)
-  .post(protect, isAdmin, upload("testimonial", 1).single("image"), createTestimonial);
+  .post(protect, upload("testimonial", 1).single("image"), (req, res) => {
+    if(req.user.role === 'admin') {
+      return createAdminTestimonial(req, res);
+    }
+    return createTestimonial(req, res);
+  });
+
+router.route("/user")
+  .get(protect, getUserTestimonials);
 
 router.route("/:id")
   .put(protect, isAdmin, upload("testimonial", 1).single("image"), updateTestimonial)
   .delete(protect, isAdmin, deleteTestimonial);
+
+router.route("/:id/toggle")
+  .put(protect, isAdmin, toggleTestimonialStatus);
 
 export default router;

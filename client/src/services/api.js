@@ -120,12 +120,14 @@ export const orderAPI = {
 // Testimonial APIs
 export const testimonialAPI = {
   getAll: () => api.get('/testimonial'),
+  getUserTestimonials: () => api.get('/testimonial/user'),
   create: (formData) => api.post('/testimonial', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   update: (id, formData) => api.put(`/testimonial/${id}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  toggleStatus: (id) => api.put(`/testimonial/${id}/toggle`),
   delete: (id) => api.delete(`/testimonial/${id}`),
 };
 

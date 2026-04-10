@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useEffect } from 'react';
 
 // Pages
 import Home from './pages/Home';
@@ -66,10 +67,26 @@ const UserRoute = ({ children }) => {
   );
 };
 
+// Scroll to Top Wrapper
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [pathname]);
+
+  return null;
+};
+
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />

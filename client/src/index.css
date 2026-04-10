@@ -1,35 +1,35 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
 
 @theme {
-  --color-background: #EDE8D0;
-  --color-foreground: hsl(20 20% 20%);
+  --color-background: #f7ede2;
+  --color-foreground: #1a1a1a;
   
-  --color-card: #EDE8D0;
-  --color-card-foreground: hsl(20 20% 20%);
+  --color-card: #f7ede2;
+  --color-card-foreground: #1a1a1a;
   
-  --color-popover: #EDE8D0;
-  --color-popover-foreground: hsl(20 20% 20%);
+  --color-popover: #f7ede2;
+  --color-popover-foreground: #1a1a1a;
   
-  --color-primary: hsl(20 40% 35%);
-  --color-primary-foreground: #EDE8D0;
+  --color-primary: #1a1a1a;
+  --color-primary-foreground: #f7ede2;
   
-  --color-secondary: #dfdab9;
-  --color-secondary-foreground: hsl(20 20% 20%);
+  --color-secondary: #ffbe0b;
+  --color-secondary-foreground: #1a1a1a;
   
-  --color-muted: #d6d0ae;
-  --color-muted-foreground: hsl(20 10% 40%);
+  --color-muted: #e9e2d5;
+  --color-muted-foreground: #666666;
   
-  --color-accent: hsl(20 60% 55%);
-  --color-accent-foreground: #EDE8D0;
+  --color-accent: #ffbe0b;
+  --color-accent-foreground: #1a1a1a;
   
   --color-destructive: hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(210 40% 98%);
   
-  --color-border: #cdc7a2;
-  --color-input: #cdc7a2;
-  --color-ring: hsl(20 40% 35%);
+  --color-border: #e2d9c8;
+  --color-input: #e2d9c8;
+  --color-ring: #ffbe0b;
   
   --radius-sm: calc(0.5rem - 4px);
   --radius-md: calc(0.5rem - 2px);
@@ -39,13 +39,14 @@
 
 @layer base {
   :root {
-    --background: #EDE8D0;
-    --foreground: hsl(20 20% 20%);
-    --border: #dfdab9;
-    --accent: hsl(20 60% 55%);
-    --accent-foreground: #EDE8D0;
+    --background: #f7ede2;
+    --foreground: #1a1a1a;
+    --border: #e2d9c8;
+    --accent: #ffbe0b;
+    --accent-foreground: #1a1a1a;
     --font-sans: 'Lato', system-ui, sans-serif;
-    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-serif: 'Cormorant Garamond', serif;
+    --font-display: 'Playfair Display', serif;
   }
 
   * {

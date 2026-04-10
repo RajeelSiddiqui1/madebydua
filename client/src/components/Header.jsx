@@ -58,10 +58,7 @@ const Header = ({
   };
 
   const handleNavClick = (e, path) => {
-    if (!isAuthenticated && path === '/shop') {
-      e.preventDefault();
-      navigate('/login');
-    }
+    // Nav click behavior
   };
 
   return (
@@ -125,8 +122,7 @@ const Header = ({
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 shrink-0 hidden lg:flex group transition-all duration-300" style={{ fontFamily: 'var(--font-serif)' }}>
-           
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/90 bg-clip-text text-transparent">Handmade By Dua</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground">Handmade By Dua</span>
           </Link>
 
           {/* Search */}

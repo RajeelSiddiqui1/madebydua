@@ -63,8 +63,8 @@ const About = () => {
       <section className="bg-secondary py-16 lg:py-24 text-center">
         <div className="max-w-3xl mx-auto px-4">
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-xs font-medium uppercase tracking-wider mb-4">Our Story</span>
-          <h1 className="text-4xl lg:text-5xl font-light leading-tight mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
-            The Art of <span className="italic text-accent">Handcrafted</span> Pottery
+          <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
+            The Art of <span className="italic text-black">Handcrafted</span> Pottery
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed">
             We believe that every piece of pottery tells a story. Each creation is born from clay, shaped by hands, and fired with passion.
@@ -83,7 +83,7 @@ const About = () => {
             />
           </div>
           <div>
-            <h2 className="text-3xl lg:text-4xl font-light mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
               A Journey of <span className="italic text-accent">Craftsmanship</span>
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">

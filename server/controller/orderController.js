@@ -92,7 +92,13 @@ export const checkout = async (req, res) => {
       discountAmount += (totalAmount * 10) / 100;
     }
 
-    const finalAmount = totalAmount - discountAmount;
+    // Shipping charge calculation
+    const SHIPPING_CHARGE = 200;
+    const FREE_SHIPPING_THRESHOLD = 3499;
+    const subtotalAfterDiscount = totalAmount - discountAmount;
+    const shippingCharge = subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
+
+    const finalAmount = subtotalAfterDiscount + shippingCharge;
 
     // Handle payment receipt upload
     let paymentReceipt = "";

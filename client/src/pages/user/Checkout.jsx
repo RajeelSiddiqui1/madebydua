@@ -82,9 +82,25 @@ const Checkout = () => {
       return total + (item.product?.price || 0) * item.quantity;
     }, 0);
   };
+  
+  const calculateOriginalTotal = () => {
+    return cart.products.reduce((total, item) => {
+      const originalPrice = item.product?.comparePrice || item.product?.price || 0;
+      return total + originalPrice * item.quantity;
+    }, 0);
+  };
+
+  const calculateProductDiscount = () => {
+    return cart.products.reduce((total, item) => {
+      if (item.product?.comparePrice && item.product.comparePrice > item.product.price) {
+        return total + (item.product.comparePrice - item.product.price) * item.quantity;
+      }
+      return total;
+    }, 0);
+  };
 
   const calculateDiscount = () => {
-    let totalDiscount = 0;
+    let totalDiscount = calculateProductDiscount();
     const appliedCouponsList = Object.values(appliedCoupons).filter(c => c);
     
     if (appliedCouponsList.length > 0) {
@@ -92,7 +108,7 @@ const Checkout = () => {
         totalDiscount += coupon.discount || 0;
       });
     } else if (isReturningUser) {
-       totalDiscount = (calculateTotal() * 10) / 100;
+       totalDiscount += (calculateTotal() * 10) / 100;
     }
     return totalDiscount;
   };
@@ -178,13 +194,28 @@ const Checkout = () => {
 
   // Remove product from cart
   const removeProductFromCart = async (productId) => {
-    if (window.confirm('Are you sure you want to remove this product from your cart?')) {
-      try {
+    try {
+        // Clear coupon state for this product first
+        setAppliedCoupons(prev => {
+          const newCoupons = { ...prev };
+          delete newCoupons[productId];
+          return newCoupons;
+        });
+        setCouponInputs(prev => {
+          const newInputs = { ...prev };
+          delete newInputs[productId];
+          return newInputs;
+        });
+        setCouponErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[productId];
+          return newErrors;
+        });
+        
         await cartAPI.removeFromCart(productId);
         fetchCart();
       } catch (error) {
         console.error('Error removing product:', error);
-      }
     }
   };
 
@@ -254,18 +285,29 @@ const Checkout = () => {
   const getItemDiscount = (item) => {
     const productId = item.product?._id;
     const coupon = appliedCoupons[productId];
-    if (coupon) return coupon.discount || 0;
+    let totalDiscount = 0;
     
-    // 10% Returning user discount applies if no specific coupon used
-    if (isReturningUser && Object.keys(appliedCoupons).length === 0) {
-       return ((item.product?.price || 0) * item.quantity * 10) / 100;
+    // First apply product's own compare price discount
+    if (item.product?.comparePrice && item.product.comparePrice > item.product.price) {
+      const productDiscount = (item.product.comparePrice - item.product.price) * item.quantity;
+      totalDiscount += productDiscount;
     }
-    return 0;
+    
+    // Then apply coupon discount if available
+    if (coupon) {
+      totalDiscount += coupon.discount || 0;
+    } 
+    // Apply 10% Returning user discount only if no coupon used
+    else if (isReturningUser && Object.keys(appliedCoupons).length === 0) {
+       totalDiscount += ((item.product?.price || 0) * item.quantity * 10) / 100;
+    }
+    
+    return totalDiscount;
   };
 
   const getItemFinalPrice = (item) => {
-    const originalPrice = (item.product?.price || 0) * item.quantity;
-    return originalPrice - getItemDiscount(item);
+    const comparePrice = (item.product?.comparePrice || item.product?.price || 0) * item.quantity;
+    return comparePrice - getItemDiscount(item);
   };
 
   if (loading) {
@@ -561,6 +603,7 @@ const Checkout = () => {
                           </div>
                           
                           <button
+                            type="button"
                             onClick={() => removeProductFromCart(productId)}
                             className="text-red-500 hover:text-red-700 p-1"
                             title="Remove product"
@@ -680,11 +723,19 @@ const Checkout = () => {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-xs truncate">{item.product?.name}</p>
-                        <p className="text-muted-foreground text-xs">Qty: {item.quantity}</p>
+                        <p className="text-muted-foreground text-xs">
+                          Qty: {item.quantity} 
+                          {item.product?.comparePrice && item.product.comparePrice > item.product.price && (
+                            <span className="ml-2 text-green-600">
+                              ({Math.round(((item.product.comparePrice - item.product.price) / item.product.comparePrice) * 100)}% OFF)
+                            </span>
+                          )}
+                        </p>
                       </div>
                       <button
+                        type="button"
                         onClick={() => removeProductFromCart(item.product?._id)}
-                        className="text-red-500 hover:text-red-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="text-red-500 hover:text-red-700 p-1 transition-opacity"
                         title="Remove product"
                       >
                         <Trash2 size={14} />
@@ -703,17 +754,52 @@ const Checkout = () => {
                   ))}
                 </div>
 
-                <div className="space-y-2 border-t border-border pt-3">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>Rs.{calculateTotal().toFixed(2)}</span>
-                  </div>
-                  {calculateDiscount() > 0 && (
-                    <div className="flex justify-between text-xs text-green-600">
-                      <span>Discount {isReturningUser && Object.keys(appliedCoupons).length === 0 ? '(Returning User 10%)' : ''}</span>
-                      <span>-Rs.{calculateDiscount().toFixed(2)}</span>
-                    </div>
-                  )}
+                 <div className="space-y-2 border-t border-border pt-3">
+                   {calculateProductDiscount() > 0 && (
+                     <div className="flex justify-between text-xs">
+                       <span className="text-muted-foreground">MRP Total</span>
+                       <span>Rs.{calculateOriginalTotal().toFixed(2)}</span>
+                     </div>
+                   )}
+                   
+                   <div className="flex justify-between text-xs">
+                     <span className="text-muted-foreground">Subtotal</span>
+                     <span>Rs.{calculateTotal().toFixed(2)}</span>
+                   </div>
+                   
+                   {calculateProductDiscount() > 0 && (
+                     <div className="flex justify-between text-xs text-green-600 bg-green-50 p-2 rounded-lg">
+                       <span>🎉 You Saved on Products</span>
+                       <span className="font-bold">- Rs.{calculateProductDiscount().toFixed(2)}</span>
+                     </div>
+                   )}
+                   {calculateDiscount() > 0 && (
+                     <>
+                       {calculateProductDiscount() > 0 && (
+                         <div className="flex justify-between text-xs text-green-600">
+                           <span>Product Discount</span>
+                           <span>-Rs.{calculateProductDiscount().toFixed(2)}</span>
+                         </div>
+                       )}
+                       
+                       {calculateDiscount() - calculateProductDiscount() > 0 && (
+                         <div className="flex justify-between text-xs text-green-600">
+                           <span>
+                             {isReturningUser && Object.keys(appliedCoupons).length === 0 
+                               ? 'Returning User (10%)' 
+                               : 'Coupon Discount'
+                             }
+                           </span>
+                           <span>-Rs.{(calculateDiscount() - calculateProductDiscount()).toFixed(2)}</span>
+                         </div>
+                       )}
+                       
+                       <div className="flex justify-between text-xs font-bold text-green-700 pt-1 border-t border-green-100">
+                         <span>✅ Total You Save</span>
+                         <span>-Rs.{calculateDiscount().toFixed(2)}</span>
+                       </div>
+                     </>
+                   )}
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Shipping</span>
                     <span>{calculateShipping() === 0 ? 'Free' : `Rs.${calculateShipping().toFixed(2)}`}</span>
@@ -725,8 +811,8 @@ const Checkout = () => {
                   )}
                 
                   <div className="flex justify-between font-bold text-sm pt-2 border-t border-border">
-                    <span>Total</span>
-                    <span>Rs.{(calculateGrandTotal() * 1.1).toFixed(2)}</span>
+                    <span>Grand Total</span>
+                    <span>Rs.{calculateGrandTotal().toFixed(2)}</span>
                   </div>
                 </div>
 

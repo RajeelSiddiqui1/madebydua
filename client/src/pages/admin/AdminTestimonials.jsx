@@ -6,6 +6,7 @@ const AdminTestimonials = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
   const [formData, setFormData] = useState({ name: '', reviewText: '', rating: 5, active: true });
   const [editingId, setEditingId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -61,6 +62,15 @@ const AdminTestimonials = () => {
     }
   };
 
+  const handleToggleStatus = async (id) => {
+    try {
+      await testimonialAPI.toggleStatus(id);
+      fetchTestimonials();
+    } catch (error) {
+      console.error('Error toggling status:', error);
+    }
+  };
+
   const openModal = (testimonial = null) => {
     if (testimonial) {
       setFormData({
@@ -81,31 +91,58 @@ const AdminTestimonials = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Reviews & Testimonials</h1>
-        <button
+    <div className="px-4 sm:px-0">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-4">Reviews & Testimonials</h1>
+        <div className="flex gap-4 mb-4 border-b border-border">
+          <button 
+            onClick={() => setActiveTab('all')}
+            className={`pb-2 px-4 ${activeTab === 'all' ? 'border-b-2 border-blue-600 text-blue-600 font-medium' : 'text-muted-foreground'}`}
+          >
+            All Reviews
+          </button>
+          <button 
+            onClick={() => setActiveTab('active')}
+            className={`pb-2 px-4 ${activeTab === 'active' ? 'border-b-2 border-green-600 text-green-600 font-medium' : 'text-muted-foreground'}`}
+          >
+            Active
+          </button>
+          <button 
+            onClick={() => setActiveTab('inactive')}
+            className={`pb-2 px-4 ${activeTab === 'inactive' ? 'border-b-2 border-red-600 text-red-600 font-medium' : 'text-muted-foreground'}`}
+          >
+            Inactive
+          </button>
+        </div>
+        {/* <button
           onClick={() => openModal()}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2"
         >
           <Plus size={20} /> Add Review
-        </button>
+        </button> */}
       </div>
 
-      <div className="bg-white rounded-lg border border-border overflow-hidden shadow-sm">
-        <table className="min-w-full divide-y divide-border">
-          <thead className="bg-white">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Image</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Review</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Rating</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-border">
-            {testimonials.map((test) => (
+      <div className="bg-white rounded-lg border border-border overflow-x-auto shadow-sm">
+        <table className="min-w-[800px] w-full divide-y divide-border">
+             <thead className="bg-white">
+             <tr>
+               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Image</th>
+               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Name</th>
+               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Review</th>
+               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Rating</th>
+               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Source</th>
+               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
+               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Actions</th>
+             </tr>
+           </thead>
+           <tbody className="bg-white divide-y divide-border">
+             {testimonials
+               .filter(test => {
+                 if (activeTab === 'active') return test.active;
+                 if (activeTab === 'inactive') return !test.active;
+                 return true;
+               })
+               .map((test) => (
               <tr key={test._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                    {test.image ? (
@@ -129,19 +166,32 @@ const AdminTestimonials = () => {
                     ))}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 text-xs rounded-full ${test.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {test.active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button onClick={() => openModal(test)} className="text-blue-600 hover:text-blue-900 mr-4">
-                    <Edit size={18} />
-                  </button>
-                  <button onClick={() => handleDelete(test._id)} className="text-red-600 hover:text-red-900">
-                    <Trash2 size={18} />
-                  </button>
-                </td>
+                 <td className="px-6 py-4 whitespace-nowrap">
+                   <td className="px-6 py-4 whitespace-nowrap">
+                     <span className={`px-2 py-1 text-xs rounded-full ${test.source === 'website' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                       {test.source === 'website' ? '🌐 Website' : '👤 Admin'}
+                     </span>
+                   </td>
+                      </td>
+                   <td className="px-6 py-4 whitespace-nowrap">
+                     <button 
+                       onClick={() => handleToggleStatus(test._id)}
+                       className={`px-3 py-1 text-xs rounded-full cursor-pointer transition ${test.active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
+                     >
+                       {test.active ? '✓ Active' : '🔴 Inactive'}
+                     </button>
+                   </td>
+              
+                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                   {/* {test.source === 'admin' && (
+                     <button onClick={() => openModal(test)} className="text-blue-600 hover:text-blue-900 mr-3">
+                       <Edit size={18} />
+                     </button>
+                   )} */}
+                   <button onClick={() => handleDelete(test._id)} className="text-red-600 hover:text-red-900">
+                     <Trash2 size={18} />
+                   </button>
+                 </td>
               </tr>
             ))}
           </tbody>

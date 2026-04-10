@@ -155,3 +155,38 @@ export const sendPasswordResetOtp = async (userEmail, otp) => {
     console.error('❌ Error sending password reset OTP:', error);
   }
 };
+
+export const sendReviewNotification = async (testimonial, user) => {
+  try {
+    const adminEmail = process.env.EMAIL;
+
+    const emailContent = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #d97706; text-align: center;">New Review Submitted!</h2>
+        <p>Hello Admin,</p>
+        <p>A new customer review has been submitted and is waiting for your approval.</p>
+        <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Customer:</strong> ${testimonial.name}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Rating:</strong> ${testimonial.rating}/5 ⭐</p>
+        </div>
+        <h3>Review:</h3>
+        <p style="background: #fff; padding: 15px; border-radius: 8px; border-left: 4px solid #d97706;">"${testimonial.reviewText}"</p>
+        <p>Please login to the admin panel to approve or reject this review.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 12px; color: #6b7280; text-align: center;">Handmade By Dua - </p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"Handmade By Dua" <${process.env.EMAIL}>`,
+      to: adminEmail,
+      subject: `🆕 New Review Received from ${testimonial.name}`,
+      html: emailContent,
+    });
+
+    console.log('✅ Review notification email sent to admin');
+  } catch (error) {
+    console.error('❌ Error sending review notification:', error);
+  }
+};
