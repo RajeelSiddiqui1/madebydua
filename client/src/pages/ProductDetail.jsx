@@ -216,15 +216,7 @@ const ProductDetailContent = () => {
           </div>
 
           <div className="space-y-6 mb-10">
-            <div className="bg-secondary/10 p-4 rounded-2xl flex items-center gap-4 border border-accent/10">
-              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m11.5 11.5 2.25 2.25L18.5 9"></path><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"></path></svg>
-              </div>
-              <div>
-                <h4 className="font-bold text-sm">Handcrafted Excellence</h4>
-                <p className="text-xs text-muted-foreground">Each piece is unique and made with premium clay.</p>
-              </div>
-            </div>
+           
             
             <div className="px-1 text-muted-foreground leading-relaxed whitespace-pre-wrap text-sm md:text-base">
               {product.longDesc || product.shortDesc}
@@ -246,9 +238,7 @@ const ProductDetailContent = () => {
               {addedToCart ? 'Added to Cart!' : cartLoading ? 'Adding...' : (product.quantity > 0 ? 'Add to Cart' : 'Currently Unavailable')}
             </button>
             
-            <p className="text-center text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-bold">
-              Secure checkout with Cash on Delivery available
-            </p>
+          
           </div>
         </div>
       </div>

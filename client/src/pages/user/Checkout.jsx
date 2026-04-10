@@ -118,7 +118,7 @@ const Checkout = () => {
   };
 
   // Shipping charge
-  const SHIPPING_CHARGE = 200;
+  const SHIPPING_CHARGE = 250;
   const FREE_SHIPPING_THRESHOLD = 3499;
 
   const calculateShipping = () => {

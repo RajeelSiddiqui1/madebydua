@@ -321,11 +321,70 @@ const Home = () => {
 
 {/* ── Brand Promises & Customization ── */}
 <section className="py-24 relative overflow-hidden bg-gradient-to-b from-background via-accent/[0.03] to-background">
+
   {/* Soft Background Decor */}
   <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-accent/8 rounded-full blur-3xl -z-10 animate-pulse"></div>
   <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-3xl -z-10 animate-pulse" style={{animationDelay: '2s'}}></div>
 
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     {/* Customization & COD Banner - The "Glass" Look */}
+    <div className="relative group  lg:rounded-[5rem] overflow-hidden border border-white/40 shadow-2xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-secondary/10 opacity-60"></div>
+      <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl"></div>
+      
+      <div className="relative z-10 p-12 sm:p-24 flex flex-col items-center text-center">
+        <div className="mb-14 max-w-2xl">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent text-white rounded-full text-[9px] font-bold uppercase tracking-[0.2em] mb-8 shadow-lg shadow-accent/20">
+            Let's Collaborate
+          </span>
+          <h4 className="text-4xl lg:text-6xl font-bold mb-6 tracking-tight text-foreground/90" style={{ fontFamily: 'var(--font-serif)' }}>
+            Design Your <span className="text-accent underline decoration-accent/10 underline-offset-8">Dream Piece</span> with Dua
+          </h4>
+          <p className="text-muted-foreground text-lg sm:text-xl font-light">Custom designs, gift sets, or just a friendly chat — we're just a message away.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-6 w-full max-w-4xl justify-center">
+          {[
+            { 
+              name: "WhatsApp Us", 
+              sub: "For Instant Orders", 
+              href: "https://wa.me/923133992762", 
+              icon: <MessageSquare size={24} />,
+              theme: "bg-green-500"
+            },
+            { 
+              name: "Instagram Gallery", 
+              sub: "Daily Behind the Scenes", 
+              href: "https://instagram.com/handmade.by.dua", 
+              icon: <Instagram size={24} />,
+              theme: "bg-pink-500"
+            }
+          ].map((card, i) => (
+            <a 
+              key={i}
+              href={card.href} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group/btn flex-1 flex items-center justify-between p-7 bg-white/60 border border-white rounded-[2rem] transition-all duration-500 hover:scale-[1.03] hover:bg-white hover:shadow-2xl hover:shadow-accent/5"
+            >
+              <div className="flex items-center gap-5">
+                <div className={`p-4 rounded-2xl text-white shadow-lg transition-transform group-hover/btn:scale-110 duration-500 ${card.theme}`}>
+                  {card.icon}
+                </div>
+                <div className="text-left">
+                  <p className="font-black text-lg text-foreground/80">{card.name}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">{card.sub}</p>
+                </div>
+              </div>
+              <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-accent/10 text-accent group-hover/btn:bg-accent group-hover/btn:text-white transition-all duration-500">
+                <ChevronRight size={20} />
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+  <div className="max-w-7xl mt-20 mx-auto px-4 sm:px-6 lg:px-8">
     {/* Section Header */}
      <div className="text-center mb-16">
       <h2 className="text-3xl sm:text-5xl font-bold mb-4 text-foreground/90 tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -439,63 +498,7 @@ const Home = () => {
       </div>
     </div>
 
-    {/* Customization & COD Banner - The "Glass" Look */}
-    <div className="relative group rounded-[3rem] lg:rounded-[5rem] overflow-hidden border border-white/40 shadow-2xl">
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-secondary/10 opacity-60"></div>
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl"></div>
-      
-      <div className="relative z-10 p-12 sm:p-24 flex flex-col items-center text-center">
-        <div className="mb-14 max-w-2xl">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent text-white rounded-full text-[9px] font-bold uppercase tracking-[0.2em] mb-8 shadow-lg shadow-accent/20">
-            Let's Collaborate
-          </span>
-          <h4 className="text-4xl lg:text-6xl font-bold mb-6 tracking-tight text-foreground/90" style={{ fontFamily: 'var(--font-serif)' }}>
-            Design Your <span className="text-accent underline decoration-accent/10 underline-offset-8">Dream Piece</span> with Dua
-          </h4>
-          <p className="text-muted-foreground text-lg sm:text-xl font-light">Custom designs, gift sets, or just a friendly chat — we're just a message away.</p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-6 w-full max-w-4xl justify-center">
-          {[
-            { 
-              name: "WhatsApp Us", 
-              sub: "For Instant Orders", 
-              href: "https://wa.me/923133992762", 
-              icon: <MessageSquare size={24} />,
-              theme: "bg-green-500"
-            },
-            { 
-              name: "Instagram Gallery", 
-              sub: "Daily Behind the Scenes", 
-              href: "https://instagram.com/handmade.by.dua", 
-              icon: <Instagram size={24} />,
-              theme: "bg-pink-500"
-            }
-          ].map((card, i) => (
-            <a 
-              key={i}
-              href={card.href} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group/btn flex-1 flex items-center justify-between p-7 bg-white/60 border border-white rounded-[2rem] transition-all duration-500 hover:scale-[1.03] hover:bg-white hover:shadow-2xl hover:shadow-accent/5"
-            >
-              <div className="flex items-center gap-5">
-                <div className={`p-4 rounded-2xl text-white shadow-lg transition-transform group-hover/btn:scale-110 duration-500 ${card.theme}`}>
-                  {card.icon}
-                </div>
-                <div className="text-left">
-                  <p className="font-black text-lg text-foreground/80">{card.name}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">{card.sub}</p>
-                </div>
-              </div>
-              <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-accent/10 text-accent group-hover/btn:bg-accent group-hover/btn:text-white transition-all duration-500">
-                <ChevronRight size={20} />
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
+ 
   </div>
 </section>
 
