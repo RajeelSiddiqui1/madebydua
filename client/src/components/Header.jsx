@@ -68,7 +68,7 @@ const Header = ({
     <header className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
       {/* Free Shipping Banner */}
       <div className="bg-accent text-accent-foreground text-center py-1 text-xs font-medium">
-        🚚 Enjoy FREE shipping on prepaid orders above Rs. 3,499
+        Enjoy FREE shipping on prepaid orders above Rs. 3,499
       </div>
       
       {/* Mobile Header */}
