@@ -193,7 +193,7 @@ const Home = () => {
 
       {/* ── Shop by Category ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-center mb-10" style={{ fontFamily: 'var(--font-serif)' }}>
+        <h2 className="text-2xl sm:text-4xl font-bold  text-center mb-10" style={{ fontFamily: 'var(--font-serif)' }}>
           Shop by Category
         </h2>
         {displayCategories.length > 0 ? (
@@ -220,9 +220,9 @@ const Home = () => {
       <section className="bg-card py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-accent text-sm font-medium uppercase tracking-widest mb-1">Featured</p>
-            <h2 className="text-2xl sm:text-3xl font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Featured Pieces</h2>
-            <p className="text-muted-foreground mt-2">Handpicked for you</p>
+            
+            <h2 className="text-2xl sm:text-4xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>Featured Pieces</h2>
+            
           </div>
           {displayFeatured.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -275,7 +275,7 @@ const Home = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-10">
           
-          <h2 className="text-2xl sm:text-3xl font-semibold" style={{ fontFamily: 'var(--font-serif)' }}>Most Popular</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>Most Popular</h2>
         </div>
         {displayNewArrivals.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -327,63 +327,7 @@ const Home = () => {
   <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-3xl -z-10 animate-pulse" style={{animationDelay: '2s'}}></div>
 
      {/* Customization & COD Banner - The "Glass" Look */}
-    <div className="relative group  lg:rounded-[5rem] overflow-hidden border border-white/40 shadow-2xl">
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-secondary/10 opacity-60"></div>
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl"></div>
-      
-      <div className="relative z-10 p-12 sm:p-24 flex flex-col items-center text-center">
-        <div className="mb-14 max-w-2xl">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent text-white rounded-full text-[9px] font-bold uppercase tracking-[0.2em] mb-8 shadow-lg shadow-accent/20">
-            Let's Collaborate
-          </span>
-          <h4 className="text-4xl lg:text-6xl font-bold mb-6 tracking-tight text-foreground/90" style={{ fontFamily: 'var(--font-serif)' }}>
-            Design Your <span className="text-accent underline decoration-accent/10 underline-offset-8">Dream Piece</span> with Dua
-          </h4>
-          <p className="text-muted-foreground text-lg sm:text-xl font-light">Custom designs, gift sets, or just a friendly chat — we're just a message away.</p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-6 w-full max-w-4xl justify-center">
-          {[
-            { 
-              name: "WhatsApp Us", 
-              sub: "For Instant Orders", 
-              href: "https://wa.me/923133992762", 
-              icon: <MessageSquare size={24} />,
-              theme: "bg-green-500"
-            },
-            { 
-              name: "Instagram Gallery", 
-              sub: "Daily Behind the Scenes", 
-              href: "https://instagram.com/handmade.by.dua", 
-              icon: <Instagram size={24} />,
-              theme: "bg-pink-500"
-            }
-          ].map((card, i) => (
-            <a 
-              key={i}
-              href={card.href} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group/btn flex-1 flex items-center justify-between p-7 bg-white/60 border border-white rounded-[2rem] transition-all duration-500 hover:scale-[1.03] hover:bg-white hover:shadow-2xl hover:shadow-accent/5"
-            >
-              <div className="flex items-center gap-5">
-                <div className={`p-4 rounded-2xl text-white shadow-lg transition-transform group-hover/btn:scale-110 duration-500 ${card.theme}`}>
-                  {card.icon}
-                </div>
-                <div className="text-left">
-                  <p className="font-black text-lg text-foreground/80">{card.name}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">{card.sub}</p>
-                </div>
-              </div>
-              <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-accent/10 text-accent group-hover/btn:bg-accent group-hover/btn:text-white transition-all duration-500">
-                <ChevronRight size={20} />
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
-
+   
   <div className="max-w-7xl mt-20 mx-auto px-4 sm:px-6 lg:px-8">
     {/* Section Header */}
      <div className="text-center mb-16">
@@ -477,7 +421,7 @@ const Home = () => {
     )}
 
     {/* Features Grid - Refined Spacing & Animation */}
-    <div className="bg-accent p-6 sm:p-10 mb-32 -mx-4 sm:-mx-6 lg:-mx-8">
+    <div className="bg-background p-6 sm:p-10 mb-32 -mx-4 sm:-mx-6 lg:-mx-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
@@ -486,8 +430,8 @@ const Home = () => {
           { icon: <Package />, title: "Free Shipping", desc: "Complimentary delivery on orders above Rs. 3,499" },
           { icon: <Truck />, title: "Nationwide", desc: "Bringing handmade love to every corner of PK" }
         ].map((feature, i) => (
-          <div key={i} className="group bg-accent-foreground p-6 sm:p-8 rounded-[2rem] shadow-md hover:shadow-xl transition-all duration-500 flex flex-col items-center text-center transform hover:-translate-y-1">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/10 text-white rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-500">
+          <div key={i} className="group bg-black  p-6 sm:p-8 rounded-[2rem] shadow-md hover:shadow-xl transition-all duration-500 flex flex-col items-center text-center transform hover:-translate-y-1">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-accent text-accent-foreground rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-500">
               {feature.icon}
             </div>
             <h3 className="text-lg font-bold mb-2 tracking-tight text-white">{feature.title}</h3>
@@ -498,7 +442,61 @@ const Home = () => {
       </div>
     </div>
 
- 
+  <div className="relative group  lg:rounded-[5rem] overflow-hidden border border-white/40 shadow-2xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-secondary/10 opacity-60"></div>
+      <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl"></div>
+      
+      <div className="relative z-10 p-12 sm:p-24 flex flex-col items-center text-center">
+        <div className="mb-14 max-w-2xl">
+         
+          <h4 className="text-4xl lg:text-4xl font-bold mb-6 tracking-tight text-foreground/90" style={{ fontFamily: 'var(--font-serif)' }}>
+            Design Your <span className="text-accent underline decoration-accent/10 underline-offset-8">Color Customization</span> & Queries
+          </h4>
+          <p className="text-muted-foreground text-lg sm:text-xl font-light">For any custom or queries.feel free to chat with us</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-6 w-full max-w-4xl justify-center">
+          {[
+            { 
+              name: "WhatsApp Us", 
+              sub: "For Instant Orders", 
+              href: "https://wa.me/923133992762", 
+              icon: <MessageSquare size={24} />,
+              theme: "bg-green-500"
+            },
+            { 
+              name: "Instagram Gallery", 
+              sub: "Daily Behind the Scenes", 
+              href: "https://instagram.com/handmade.by.dua", 
+              icon: <Instagram size={24} />,
+              theme: "bg-pink-500"
+            }
+          ].map((card, i) => (
+            <a 
+              key={i}
+              href={card.href} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group/btn flex-1 flex items-center justify-between p-7 bg-white/60 border border-white rounded-[2rem] transition-all duration-500 hover:scale-[1.03] hover:bg-white hover:shadow-2xl hover:shadow-accent/5"
+            >
+              <div className="flex items-center gap-5">
+                <div className={`p-4 rounded-2xl text-white shadow-lg transition-transform group-hover/btn:scale-110 duration-500 ${card.theme}`}>
+                  {card.icon}
+                </div>
+                <div className="text-left">
+                  <p className="font-black text-lg text-foreground/80">{card.name}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">{card.sub}</p>
+                </div>
+              </div>
+              <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-accent/10 text-accent group-hover/btn:bg-accent group-hover/btn:text-white transition-all duration-500">
+                <ChevronRight size={20} />
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
