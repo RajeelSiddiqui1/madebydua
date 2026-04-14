@@ -194,7 +194,7 @@ const Cart = () => {
                   </div>
                   
                   {calculateTotal() < 3499 && (
-                    <div className="text-[10px] text-accent bg-accent/5 p-2 rounded-lg border border-accent/20 mt-2">
+                    <div className="text-[10px] text-black bg-accent/5 p-2 rounded-lg border border-accent/20 mt-2">
                        Add Rs.{(3499 - calculateTotal()).toFixed(2)} more for <span className="font-bold">Free Shipping</span>!
                     </div>
                   )}
